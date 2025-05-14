@@ -1,0 +1,49 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Обои",
+      "url": "/wallpaper",
+      "color": "#5e7a8a"
+    },
+    {
+      "id": 2,
+      "name": "Ванны",
+      "url": "/bathroom",
+      "color": "#5f8ca8"
+    },
+    {
+      "id": 3,
+      "name": "Сантехника",
+      "url": "/plumbing",
+      "color": "#4c6c9b"
+    },
+    {
+      "id": 4,
+      "name": "Электрика",
+      "url": "/electrical",
+      "color": "#b4686e"
+    },
+    {
+      "id": 5,
+      "name": "Крепёж",
+      "url": "/fasteners",
+      "color": "#9d4e5f"
+    },
+    {
+      "id": 6,
+      "name": "Краски",
+      "url": "/paint",
+      "color": "#7a8a5e"
+    }
+  ],
+  "contacts": {
+    "phone": "+734676 20022",
+    "email": "vizitura1@yandex.ru",
+    "address": "г. Урай мкр 1Д, дом 75А"
+  },
+  "social": {
+    "telegram": "https://t.me/vizit",
+    "vk": "https://vk.com/vizit"
+  }
+}
