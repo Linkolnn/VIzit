@@ -60,6 +60,11 @@
           
           <!-- Right column - Specifications -->
           <div class="product-layout__specs">
+            <div class="product-specs__actions  product-specs__actions--mobile">
+              <NuxtLink :to="social.telegram" class="consultation-btn">Бесплатная консультация
+                <img src="/assets/icons/telegram.svg" alt="Telegram" class="consultation-btn__icon">
+              </NuxtLink>
+            </div>
             <div class="product-specs">
               <h3 class="product-specs__title">Характеристики</h3>
               <div class="product-specs__list">
@@ -69,10 +74,10 @@
                 </div>
               </div>
               
-              <div class="product-specs__actions">
-                <button class="consultation-btn">Бесплатная консультация
+              <div class="product-specs__actions product-specs__actions--desktop">
+                <NuxtLink :to="social.telegram" class="consultation-btn">Бесплатная консультация
                   <img src="/assets/icons/telegram.svg" alt="Telegram" class="consultation-btn__icon">
-                </button>
+                </NuxtLink>
               </div>
             </div>
           </div>
@@ -105,6 +110,7 @@ const route = useRoute();
 const router = useRouter();
 const navigationStore = useNavigationStore();
 const productsStore = useProductsStore();
+const social = computed(() => navigationStore.socialLinks);
 
 // State
 const activeThumb = ref(0);
@@ -248,7 +254,7 @@ useHead({
 
 .product-gallery__main
   width: 100%
-  height: 400px
+  height: 600px
   border-radius: $radius
   overflow: hidden
   margin-bottom: 15px
@@ -313,7 +319,7 @@ useHead({
   margin-bottom: 20px
 
 .product-details__price
-  font-size: 28px
+  font-size: 32px
   font-weight: 700
   color: $text-primary
   margin: 0
@@ -342,7 +348,7 @@ useHead({
 
 .product-specs__title
   padding: 15px
-  font-size: 18px
+  font-size: 28px
   font-weight: 600
   margin: 0
   color: $text-primary
@@ -368,14 +374,17 @@ useHead({
 
 .product-specs__value
   width: 60%
-  padding: 10px 15px
-  font-size: 14px
+  padding: 10px 
+  font-size: 16px
   color: $text-primary
 
 .product-specs__actions
   margin-top: auto
   display: flex
   justify-content: center
+
+  &--mobile
+    display: none
 
 .consultation-btn
   display: flex
@@ -426,11 +435,16 @@ useHead({
   color: $text-primary
 
 @include tablet
+  .product-specs__actions
+    &--mobile
+      display: flex
+      margin-block: 20px
+      
+    &--desktop
+      display: none
+
   .product-gallery__main
     height: 350px
-  
-  .product-details__price
-    font-size: 24px
   
   .product-details__old-price
     font-size: 16px
@@ -449,9 +463,6 @@ useHead({
   
   .product-details__meta-label
     width: 100px
-  
-  .product-details__price
-    font-size: 22px
   
   .product-details__old-price
     font-size: 14px
