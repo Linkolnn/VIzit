@@ -132,7 +132,6 @@ onBeforeUnmount(() => {
 
 @include hover 
   .nav__list-link:hover
-    color: $white
     opacity: 0.9
 
 @include mobile

@@ -219,9 +219,6 @@ onBeforeUnmount(() => {
   transition: all 0.3s ease
 
 @include hover
-  .footer__social-link:hover
-    background-color: rgba(255, 255, 255, 0.2)
-  
   .footer__nav-link:hover
     opacity: 0.9
 
