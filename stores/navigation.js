@@ -14,6 +14,9 @@ export const useNavigationStore = defineStore('navigation', {
     },
     getCategoryById: (state) => (id) => {
       return state.categoryList.find(category => category.id === id);
+    },
+    getCategoryByName: (state) => (name) => {
+      return state.categoryList.find(category => category.name === name);
     }
   },
   actions: {

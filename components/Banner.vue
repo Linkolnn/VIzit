@@ -39,7 +39,7 @@ const props = defineProps({
   width: 100%
   height: 727px
   overflow: hidden
-  margin-bottom: 40px
+  margin-bottom: 20px
   
   @include mobile
     height: 354px

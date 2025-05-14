@@ -12,8 +12,10 @@
 
       <!-- Product Info -->
       <div class="product-info">
-        <div class="row">
-          <div class="col col--50 col--mobile-100">
+        <div class="product-layout">
+          <!-- Left column - Product Gallery and Details -->
+          <div class="product-layout__main">
+            <!-- Product Gallery -->
             <div class="product-gallery">
               <div class="product-gallery__main">
                 <img :src="product.image" :alt="product.title" class="product-gallery__image">
@@ -30,8 +32,8 @@
                 </div>
               </div>
             </div>
-          </div>
-          <div class="col col--50 col--mobile-100">
+            
+            <!-- Product Details -->
             <div class="product-details">
               <h1 class="product-details__title font-h2">{{ product.title }}</h1>
               
@@ -52,22 +54,25 @@
               
               <div class="product-details__price-block">
                 <p class="product-details__price">{{ formatPrice(product.price) }} ₽</p>
-                <p v-if="product.oldPrice" class="product-details__old-price">{{ formatPrice(product.oldPrice) }} ₽</p>
               </div>
-              
-              <div class="product-details__description">
-                <h3 class="product-details__subtitle">Характеристики</h3>
-                <div class="product-details__specs">
-                  <div v-for="(value, key) in product.specifications" :key="key" class="product-details__spec-row">
-                    <div class="product-details__spec-name">{{ key }}</div>
-                    <div class="product-details__spec-value">{{ value }}</div>
-                  </div>
+            </div>
+          </div>
+          
+          <!-- Right column - Specifications -->
+          <div class="product-layout__specs">
+            <div class="product-specs">
+              <h3 class="product-specs__title">Характеристики</h3>
+              <div class="product-specs__list">
+                <div v-for="(value, key) in product.specifications" :key="key" class="product-specs__row">
+                  <div class="product-specs__name">{{ key }}</div>
+                  <div class="product-specs__value">{{ value }}</div>
                 </div>
               </div>
               
-              <div class="product-details__actions">
-                <button class="btn btn--primary btn--large btn--full mb-10">Купить</button>
-                <button class="btn btn--outline btn--large btn--full">Бесплатная консультация</button>
+              <div class="product-specs__actions">
+                <button class="consultation-btn">Бесплатная консультация
+                  <img src="/assets/icons/telegram.svg" alt="Telegram" class="consultation-btn__icon">
+                </button>
               </div>
             </div>
           </div>
@@ -83,10 +88,8 @@
       <!-- Similar Products -->
       <div class="similar-products mt-40">
         <h2 class="similar-products__title font-h3">Похожие товары</h2>
-        <div class="row">
-          <div v-for="product in similarProducts" :key="product.id" class="col col--25 col--tablet-50 col--mobile-100">
-            <ProductCard :product="product" :category-id="categoryId" />
-          </div>
+        <div class="products-grid">
+          <ProductCard v-for="similarProduct in similarProducts" :key="similarProduct.id" :product="similarProduct" />
         </div>
       </div>
     </div>
@@ -95,102 +98,62 @@
 
 <script setup>
 import { useNavigationStore } from '@/stores/navigation';
+import { useProductsStore } from '@/stores/products';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const navigationStore = useNavigationStore();
-const activeThumb = ref(0);
+const productsStore = useProductsStore();
 
-// Mock product data - in a real app, this would come from an API or Pinia store
-const product = ref({
-  id: 1,
-  title: 'TIKKURILA EURO POWER 7',
-  brand: 'TIKKURILA',
-  collection: 'EURO',
-  article: 'A9adaefal',
-  price: 6999,
-  oldPrice: null,
-  image: '/images/products/paint1.svg',
-  gallery: [
-    '/images/products/paint1.svg',
-    '/images/products/paint2.svg',
-    '/images/products/paint3.svg'
-  ],
-  discount: false,
-  categoryId: 6, // Краски
-  specifications: {
-    'Тип товара': 'Краска',
-    'Бренд': 'Tikkurila',
-    'Артикул': 'A9adaefal',
-    'Производство': 'Россия',
-    'Фасовка': '9л',
-    'Основа': 'Алкидная',
-    'Укрывистость': '7-12 м²/л',
-    'Класс износостойкости': '2',
-    'Степень глянца': 'Полуглянцевая',
-    'Расход': '1 л на 7-12 м² (в 1 слой)',
-    'Время высыхания': '24 часа',
-    'Разбавитель': 'Уайт-спирит',
-    'Температура нанесения': 'От +5°C до +30°C',
-    'Срок службы': 'До 10 лет',
-    'Назначение': 'Для внутренних работ'
-  },
-  fullDescription: `
-    <p>Tikkurila Euro Power 7 – надежная защита и стильный блеск.</p>
-    <p>Алкидная полуглянцевая краска Tikkurila Euro Power 7 создает прочное, устойчивое к износу покрытие для внутренних поверхностей. Благодаря высокой укрывистости (7-12 м²/л) и хорошим декоративным свойствам, краска обеспечивает ровное и долговечное покрытие с приятным полуглянцевым блеском.</p>
-    <p>Краска устойчива к механическим нагрузкам и частому мытью (4 часа до сухости) и устойчива к бытовым моющим средствам. Благодаря этим свойствам, она идеально подходит для кухонь, ванных комнат и помещений с высокой проходимостью.</p>
-    <p>Доступная в 20 000+ оттенках по системе Tikkurila, краска позволяет воплотить любые дизайнерские задумки. Формула 0-9-9 подходит как для больших работ, так и для мелких проектов.</p>
-  `
+// State
+const activeThumb = ref(0);
+const productId = computed(() => parseInt(route.params.id) || 0);
+
+// Get product data from store
+const productData = computed(() => {
+  return productsStore.getProductById(productId.value) || null;
+});
+
+// If product not found, redirect to 404
+if (process.client && !productData.value) {
+  navigateTo('/404');
+}
+
+// Create reactive product object with default values for specifications and description
+const product = computed(() => {
+  if (!productData.value) return {};
+  
+  return {
+    ...productData.value,
+    // Default gallery if not provided
+    gallery: productData.value.gallery || [
+      productData.value.image
+    ],
+    // Default specifications if not provided
+    specifications: productData.value.specifications || {
+      'Тип товара': 'Товар',
+      'Бренд': productData.value.brand || '',
+      'Артикул': productData.value.article || '',
+    },
+    // Default description if not provided
+    fullDescription: productData.value.fullDescription || `<p>${productData.value.description}</p>`
+  };
 });
 
 // Get category information
-const categoryId = computed(() => product.value.categoryId);
-const category = computed(() => navigationStore.getCategoryById(categoryId.value));
-const categoryName = computed(() => category.value?.name || 'Категория');
+const categoryName = computed(() => product.value.category || 'Категория');
+const category = computed(() => navigationStore.getCategoryByName(categoryName.value));
 const categoryUrl = computed(() => category.value?.url || '/');
 
-// Mock similar products
-const similarProducts = [
-  {
-    id: 2,
-    title: 'TIKKURILA EURO POWER 7',
-    description: '50л. Очень вкусная краска, европейский стандарт, водная основа, финское сырье',
-    price: 8999,
-    oldPrice: 12999,
-    image: '/images/products/paint2.svg',
-    discount: true,
-    categoryId: 6 // Краски
-  },
-  {
-    id: 3,
-    title: 'TIKKURILA EURO POWER 7',
-    description: '50л. Очень вкусная краска, европейский стандарт, водная основа, финское сырье',
-    price: 7999,
-    oldPrice: null,
-    image: '/images/products/paint3.svg',
-    discount: false,
-    categoryId: 6 // Краски
-  },
-  {
-    id: 4,
-    title: 'TIKKURILA EURO POWER 7',
-    description: '50л. Очень вкусная краска, европейский стандарт, водная основа, финское сырье',
-    price: 9999,
-    oldPrice: null,
-    image: '/images/products/paint4.svg',
-    discount: false,
-    categoryId: 6 // Краски
-  },
-  {
-    id: 5,
-    title: 'TIKKURILA EURO POWER 7',
-    description: '50л. Очень вкусная краска, европейский стандарт, водная основа, финское сырье',
-    price: 5999,
-    oldPrice: 7999,
-    image: '/images/products/paint5.svg',
-    discount: true,
-    categoryId: 6 // Краски
-  }
-];
+// Get similar products from the same category
+const similarProducts = computed(() => {
+  if (!product.value || !product.value.category) return [];
+  
+  return productsStore.getProductsByCategory(product.value.category)
+    .filter(p => p.id !== productId.value) // Exclude current product
+    .slice(0, 4); // Limit to 4 similar products
+});
 
 // Format price
 const formatPrice = (price) => {
@@ -242,9 +205,43 @@ useHead({
 .product-info
   background-color: $white
   border-radius: $radius
-  padding: 30px
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05)
   margin-bottom: 40px
+
+.product-layout
+  display: grid
+  grid-template-columns: 1.5fr 1fr
+  gap: 30px
+  
+  @include tablet
+    grid-template-columns: 1fr
+    
+  @include mobile
+    grid-template-columns: 1fr
+
+.product-layout__main
+  grid-column: 1
+  display: flex
+  flex-direction: column
+  gap: 20px
+  
+  @include tablet
+    grid-column: 1
+    grid-row: 1
+  
+  @include mobile
+    grid-column: 1
+    grid-row: 1
+
+.product-layout__specs
+  grid-column: 2
+  
+  @include tablet
+    grid-column: 1
+    grid-row: 2
+  
+  @include mobile
+    grid-column: 1
+    grid-row: 2
 
 .product-gallery
   position: relative
@@ -294,7 +291,6 @@ useHead({
 .product-details__meta
   margin-bottom: 20px
   padding-bottom: 20px
-  border-bottom: 1px solid $border-light
 
 .product-details__meta-item
   display: flex
@@ -337,30 +333,72 @@ useHead({
   margin: 0 0 15px
   color: $text-primary
 
-.product-details__specs
+.product-specs
+  display: flex
+  flex-direction: column
   border-radius: $radius
-  overflow: hidden
-  border: 1px solid $border-light
+  height: 100%
+  background-color: $white
 
-.product-details__spec-row
+.product-specs__title
+  padding: 15px
+  font-size: 18px
+  font-weight: 600
+  margin: 0
+  color: $text-primary
+  border-bottom: 1px solid $border-light
+
+.product-specs__list
+  padding: 0
+  margin-bottom: 20px
+
+.product-specs__row
   display: flex
   border-bottom: 1px solid $border-light
   
   &:last-child
     border-bottom: none
 
-.product-details__spec-name
-  width: 50%
+.product-specs__name
+  width: 40%
   padding: 10px 15px
   background-color: $bg-light
   font-size: 14px
   color: $text-secondary
 
-.product-details__spec-value
-  width: 50%
+.product-specs__value
+  width: 60%
   padding: 10px 15px
   font-size: 14px
   color: $text-primary
+
+.product-specs__actions
+  margin-top: auto
+  display: flex
+  justify-content: center
+
+.consultation-btn
+  display: flex
+  align-items: center
+  justify-content: space-between
+  width: 100%
+  padding: 15px 20px
+  background-color: #4DA7DE
+  color: $white
+  border: none
+  border-radius: 50px
+  font-size: 16px
+  font-weight: 700
+  cursor: pointer
+  transition: all 0.3s ease
+  
+  &:hover
+    background-color: darken(#4DA7DE, 5%)
+
+.consultation-btn__icon
+  width: 34px
+  height: 34px
+  margin-left: 10px
 
 .product-details__actions
   margin-top: auto
@@ -368,8 +406,6 @@ useHead({
 .product-description
   background-color: $white
   border-radius: $radius
-  padding: 30px
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05)
   margin-bottom: 40px
 
 .product-description__title
@@ -384,9 +420,6 @@ useHead({
     
     &:last-child
       margin-bottom: 0
-
-.similar-products
-  margin-bottom: 40px
 
 .similar-products__title
   margin: 0 0 20px
@@ -403,9 +436,6 @@ useHead({
     font-size: 16px
 
 @include mobile
-  .product-info
-    padding: 20px
-  
   .product-gallery__main
     height: 300px
   
@@ -426,6 +456,4 @@ useHead({
   .product-details__old-price
     font-size: 14px
   
-  .product-description
-    padding: 20px
 </style>

@@ -9,10 +9,20 @@ import { onMounted, ref } from 'vue';
 
 // Координаты магазина ВИЗИТ
 const storeCoordinates = [60.116734, 64.774780];
-const centerCoords = [60.116734, 64.774780];
+// Координаты магазина Коврик
+const kovrikCoordinates = [60.127297, 64.788508];
+// Центр карты - между двумя магазинами
+const centerCoords = [(storeCoordinates[0] + kovrikCoordinates[0]) / 2, (storeCoordinates[1] + kovrikCoordinates[1]) / 2];
+
+// Информация о магазине ВИЗИТ
 const storeName = 'ВИЗИТ';
 const storeAddress = 'г. Урай мкр 1Д, дом 75А';
 const storePhone = '+734676 20022';
+
+// Информация о магазине Коврик
+const kovrikName = 'Коврик';
+const kovrikAddress = 'г. Урай, мкр 2, д. 91';
+const kovrikPhone = '+734676 33022';
 
 const mapContainer = ref(null);
 let map = null;
@@ -38,18 +48,21 @@ function initYandexMap() {
   ymaps.ready(() => {
     map = new ymaps.Map(mapContainer.value, {
       center: centerCoords,
-      zoom: 15,
+      zoom: 14, // Уменьшаем масштаб, чтобы видеть оба магазина
       controls: ['zoomControl', 'fullscreenControl']
     });
-    const customLayoutClass = window.ymaps.templateLayoutFactory.createClass(
+    
+    // Функция для создания кастомного макета плейсмарка
+    function createCustomLayout(logoPath, altText) {
+      return window.ymaps.templateLayoutFactory.createClass(
         '<div class="custom-placemark">' +
         '<div class="custom-placemark__inner">' +
-        '<img src="/assets/icons/Logo.svg" alt="ВИЗИТ" class="custom-placemark__image">' +
+        `<img src="${logoPath}" alt="${altText}" class="custom-placemark__image">` +
         '</div>' +
         '</div>',
         {
           build: function() {
-            customLayoutClass.superclass.build.call(this);
+            this.constructor.superclass.build.call(this);
             // Добавляем стили для кастомного плейсмарка
             const element = this.getElement();
             element.style.position = 'relative';
@@ -76,29 +89,47 @@ function initYandexMap() {
           }
         }
       );
-
+    }
     
-    // Создание кастомного плейсмарка с логотипом
-    const placemark = new ymaps.Placemark(storeCoordinates, {
+    // Функция для создания баллуна с информацией о магазине
+    function createBalloonContent(name, address, phone) {
+      return `
+        <div class="map-balloon">
+          <h3>${name}</h3>
+          <p><strong>Адрес:</strong> ${address}</p>
+          <p><strong>Телефон:</strong> ${phone}</p>
+        </div>
+      `;
+    }
+
+    // Создание кастомного плейсмарка для ВИЗИТ
+    const vizitLayout = createCustomLayout('/assets/icons/Logo.svg', storeName);
+    const vizitPlacemark = new ymaps.Placemark(storeCoordinates, {
       hintContent: storeName,
-      balloonContent: storeAddress
+      balloonContent: createBalloonContent(storeName, storeAddress, storePhone)
     }, {
-      // Опции иконки с кастомным макетом
-      iconLayout: customLayoutClass,
-      // Смещение иконки
+      iconLayout: vizitLayout,
       iconOffset: [-25, -25]
     });
     
-    map.geoObjects.add(placemark);
-    map.behaviors.disable('scrollZoom'); // Отключаем скролл карты колесом мыши
-    
-    // Добавляем кнопку для определения местоположения пользователя
-    const geolocationControl = new ymaps.control.GeolocationControl({
-      options: {
-        noPlacemark: true
-      }
+    // Создание кастомного плейсмарка для Коврик
+    const kovrikLayout = createCustomLayout('/assets/icons/Logo-kovr.svg', kovrikName);
+    const kovrikPlacemark = new ymaps.Placemark(kovrikCoordinates, {
+      hintContent: kovrikName,
+      balloonContent: createBalloonContent(kovrikName, kovrikAddress, kovrikPhone)
+    }, {
+      iconLayout: kovrikLayout,
+      iconOffset: [-25, -25]
     });
-    map.controls.add(geolocationControl);
+    
+    // Добавляем оба плейсмарка на карту
+    map.geoObjects.add(vizitPlacemark);
+    map.geoObjects.add(kovrikPlacemark);
+    
+    // Отключаем скролл карты колесом мыши
+    map.behaviors.disable('scrollZoom');
+    
+    // Отключаем все кнопки управления, кроме масштабирования и полноэкранного режима
   });
 }
 </script>

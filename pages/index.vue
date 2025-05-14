@@ -15,7 +15,7 @@
           </div>
         </div>
         <div class="promo__content">
-          <p class="promo__text font-text_medium">Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus iure mollitia facilis, dolores dicta quisquam velit incidunt natus. Quo ea magnam voluptate odio libero itaque laudantium sed nulla incidunt vel?</p>
+          <p class="promo__text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus iure mollitia facilis, dolores dicta quisquam velit incidunt natus. Quo ea magnam voluptate odio libero itaque laudantium sed nulla incidunt vel?</p>
         </div>
       </section>
 
@@ -32,28 +32,18 @@
 
 <script setup>
 import { useNavigationStore } from '@/stores/navigation';
+import { useSlidesStore } from '@/stores/slides';
+import { useFeaturedProductsStore } from '@/stores/featured-products';
 
 const navigationStore = useNavigationStore();
+const slidesStore = useSlidesStore();
+const featuredProductsStore = useFeaturedProductsStore();
 
-// Mock data for slider
-const sliderData = [
-  {
-    image: '/images/slider/slide1.svg',
-    title: 'ВИЗИТ очень крутой магазин',
-    description: 'Описываем описание для ВИЗИТ...',
-    buttonText: 'Подробнее',
-    buttonLink: '/about'
-  },
-  {
-    image: '/images/slider/slide2.svg',
-    title: 'Широкий выбор строительных материалов',
-    description: 'Всё для вашего ремонта в одном месте',
-    buttonText: 'Каталог',
-    buttonLink: '/products'
-  }
-];
+// Get data from stores
+const sliderData = computed(() => slidesStore.getSlides);
+const featuredProducts = computed(() => featuredProductsStore.getFeaturedProducts);
 
-// Mock data for categories with images
+// Categories with images
 const categories = computed(() => {
   return navigationStore.categoryList.map(category => ({
     ...category,
@@ -61,61 +51,6 @@ const categories = computed(() => {
     description: 'Широкий выбор товаров для вашего ремонта'
   }));
 });
-
-// Mock data for featured products
-const featuredProducts = [
-  {
-    id: 1,
-    title: 'TIKKURILA EURO POWER 7',
-    description: '50л. Очень вкусная краска, европейский стандарт, водная основа, финское сырье',
-    price: 9999,
-    oldPrice: null,
-    image: '/images/products/paint1.svg',
-    discount: false,
-    categoryId: 6 // Краски
-  },
-  {
-    id: 2,
-    title: 'TIKKURILA EURO POWER 7',
-    description: '50л. Очень вкусная краска, европейский стандарт, водная основа, финское сырье',
-    price: 9999,
-    oldPrice: 12999,
-    image: '/images/products/paint2.svg',
-    discount: true,
-    categoryId: 6 // Краски
-  },
-  {
-    id: 3,
-    title: 'Обои виниловые Marburg',
-    description: 'Стильные обои для современного интерьера',
-    price: 3999,
-    oldPrice: null,
-    image: '/images/products/wallpaper1.svg',
-    discount: false,
-    categoryId: 1 // Обои
-  },
-  {
-    id: 4,
-    title: 'Смеситель для ванной',
-    description: 'Современный дизайн, надежная конструкция',
-    price: 5999,
-    oldPrice: 7999,
-    image: '/images/products/plumbing1.svg',
-    discount: true,
-    categoryId: 3 // Сантехника
-  }
-];
-
-// Mock data for store locations
-const storeLocations = [
-  {
-    name: 'Визит',
-    address: 'г. Урай мкр 1Д, дом 75А',
-    phone: '+734676 20022',
-    coordinates: [60.116734, 64.774780],
-    icon: '/assets/icons/map-marker-circle.svg'
-  }
-];
 </script>
 
 <style lang="sass">
@@ -176,7 +111,7 @@ const storeLocations = [
 
 .promo__text
   margin: 0
-  font-size: 16px
+  font-size: 20px
   line-height: 1.6
   
   @include mobile

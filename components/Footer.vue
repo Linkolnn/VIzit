@@ -200,9 +200,6 @@ onBeforeUnmount(() => {
   .footer__address
     text-align: center
 
-.footer__social
-  justify-content: center
-
 .footer__nav-list
   display: flex
   padding: 15px 0
@@ -237,7 +234,10 @@ onBeforeUnmount(() => {
   
   .footer__contacts
     align-items: center
-  
+
+  .footer__social
+    justify-content: center
+
   .footer__nav-list
     flex-direction: column
   

@@ -1,0 +1,18 @@
+{
+  "slides": [
+    {
+      "image": "/images/slider/slide1.svg",
+      "title": "ВИЗИТ очень крутой магазин",
+      "description": "Описываем описание для ВИЗИТ...",
+      "buttonText": "Подробнее",
+      "buttonLink": "/about"
+    },
+    {
+      "image": "/images/slider/slide2.svg",
+      "title": "Широкий выбор строительных материалов",
+      "description": "Всё для вашего ремонта в одном месте",
+      "buttonText": "Каталог",
+      "buttonLink": "/products"
+    }
+  ]
+}

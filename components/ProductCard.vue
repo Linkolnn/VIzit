@@ -1,21 +1,30 @@
 <template>
-  <NuxtLink :to="`/product/${product.id}`" class="product-card" :style="{ borderColor: categoryColor }">
+  <article 
+    class="product-card" 
+    @click="navigateTo(`/product/${product.id}`)" 
+    :class="cardTypeClass" 
+    :style="{ backgroundColor: categoryColor }"
+  >
     <div class="product-card__image-wrapper">
       <img :src="product.image" :alt="product.title" class="product-card__image">
-      <div v-if="product.discount" class="product-card__discount" :style="{ backgroundColor: categoryColor }">
-        Скидка
+      <div class="product-card__brand" v-if="product.brand">
+        <img :src="product.brand" :alt="product.title" class="product-card__brand-logo">
       </div>
     </div>
     <div class="product-card__content">
       <h3 class="product-card__title">{{ product.title }}</h3>
       <p class="product-card__description">{{ product.description }}</p>
-      <div class="product-card__price-block">
-        <p class="product-card__price">{{ formatPrice(product.price) }} ₽</p>
-        <p v-if="product.oldPrice" class="product-card__old-price">{{ formatPrice(product.oldPrice) }} ₽</p>
+      <div class="product-card__footer">
+        <div class="product-card__price-block">
+          <p class="product-card__price"    
+        >
+          {{ formatPrice(product.price) }} ₽
+        </p>
+        </div>
+        <NuxtLink :to="`/product/${product.id}`" :style="{ color: categoryColor }" class="product-card__btn">Подробнее</NuxtLink>
       </div>
-      <button class="btn btn--outline product-card__btn">Подробнее</button>
     </div>
-  </NuxtLink>
+  </article>
 </template>
 
 <script setup>
@@ -26,8 +35,8 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  categoryId: {
-    type: Number,
+  categoryName: {
+    type: String,
     default: null
   }
 });
@@ -35,11 +44,25 @@ const props = defineProps({
 const navigationStore = useNavigationStore();
 
 const categoryColor = computed(() => {
-  if (props.categoryId) {
-    const category = navigationStore.getCategoryById(props.categoryId);
+  const categoryName = props.product.category || props.categoryName;
+  if (categoryName) {
+    const category = navigationStore.getCategoryByName(categoryName);
     return category ? category.color : '#5e7a8a';
   }
   return '#5e7a8a';
+});
+
+const cardTypeClass = computed(() => {
+  const categoryName = props.product.category || props.categoryName;
+  switch (categoryName) {
+    case 'Обои': return 'product-card--wallpaper';
+    case 'Ванны': return 'product-card--bathroom';
+    case 'Сантехника': return 'product-card--plumbing';
+    case 'Электрика': return 'product-card--electrical';
+    case 'Крепёж': return 'product-card--fasteners';
+    case 'Краски': return 'product-card--paint';
+    default: return '';
+  }
 });
 
 const formatPrice = (price) => {
@@ -57,111 +80,104 @@ const formatPrice = (price) => {
   flex-direction: column
   border-radius: $radius
   overflow: hidden
-  background-color: $white
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05)
   transition: all 0.3s ease
-  text-decoration: none
-  color: $text-primary
+  color: $white
   height: 100%
-  border: 2px solid transparent
+  position: relative
+  padding: 15px
 
 .product-card__image-wrapper
   position: relative
   width: 100%
-  height: 200px
+  height: 242px
+  background-color: $white
+  border-radius: $radius
   overflow: hidden
+  margin-bottom: 10px
+  display: flex
+  justify-content: center
+  align-items: center
 
 .product-card__image
+  width: 80%
+  height: 80%
+  object-fit: contain
+
+.product-card__brand
+  position: absolute
+  bottom: -1px
+  right: -1px
+  width: 80px
+  height: 30px
+  border-radius: 15px 0 15px 0
+  overflow: hidden
+  display: flex
+  justify-content: center
+  align-items: center
+
+.product-card__brand-logo
   width: 100%
   height: 100%
-  object-fit: cover
-  transition: transform 0.5s ease
-
-.product-card__discount
-  position: absolute
-  top: 10px
-  right: 10px
-  padding: 5px 10px
-  color: $white
-  font-size: 12px
-  font-weight: 500
-  border-radius: 4px
+  object-fit: contain
 
 .product-card__content
-  padding: 15px
+  padding: 0 5px
   display: flex
   flex-direction: column
+  gap: 20px
   flex-grow: 1
 
 .product-card__title
   font-size: 18px
   font-weight: 600
-  margin: 0 0 10px
-  color: $text-primary
+  color: $white
+  line-height: 1.2
+  flex-grow: 1
 
 .product-card__description
   font-size: 14px
-  color: $text-secondary
-  margin: 0 0 15px
+  color: rgba(255, 255, 255, 0.8)
   flex-grow: 1
+  line-height: 1.3
+
+.product-card__footer
+  display: flex
+  justify-content: space-between
+  align-items: center
+  margin-top: auto
 
 .product-card__price-block
   display: flex
-  align-items: center
-  margin-bottom: 15px
+  flex-direction: column
+  align-items: flex-start
 
 .product-card__price
-  font-size: 18px
+  font-size: 36px
   font-weight: 700
   margin: 0
-  color: $text-primary
+  color: $white
+  line-height: 1.2
 
-.product-card__old-price
-  font-size: 14px
-  text-decoration: line-through
-  color: $text-secondary
-  margin: 0 0 0 10px
 
 .product-card__btn
-  width: 100%
-  margin-top: auto
+  display: inline-block
+  padding: 8px 15px
+  background-color: rgba(255, 255, 255, 0.9)
+  color: $black
+  border-radius: $radius
+  text-decoration: none
+  font-weight: 700
+  font-size: 18px
+  text-align: center
+  transition: all 0.3s ease
+  white-space: nowrap
+  
+  &:hover
+    background-color: $white
 
 @include hover
   .product-card:hover
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1)
     transform: translateY(-3px)
-    
-    .product-card__image
-      transform: scale(1.05)
 
-@include tablet
-  .product-card__image-wrapper
-    height: 180px
-  
-  .product-card__title
-    font-size: 16px
-  
-  .product-card__description
-    font-size: 13px
-  
-  .product-card__price
-    font-size: 16px
 
-@include mobile
-  .product-card__image-wrapper
-    height: 160px
-  
-  .product-card__content
-    padding: 12px
-  
-  .product-card__title
-    font-size: 15px
-    margin-bottom: 8px
-  
-  .product-card__description
-    font-size: 12px
-    margin-bottom: 10px
-  
-  .product-card__price
-    font-size: 15px
 </style>

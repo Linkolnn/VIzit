@@ -1,0 +1,40 @@
+{
+  "sortOptions": [
+    { "value": "price-asc", "label": "сначала недорогой" },
+    { "value": "price-desc", "label": "сначала дорогой" },
+    { "value": "popular", "label": "сначала популярные" },
+    { "value": "new", "label": "сначала новые" }
+  ],
+  "groupOptions": {
+    "Краски": [
+      { "value": "enamel", "label": "Эмаль" },
+      { "value": "varnish", "label": "Лаки" },
+      { "value": "water-emulsion", "label": "Водоэмульсионная" }
+    ],
+    "Обои": [
+      { "value": "vinyl", "label": "Виниловые" },
+      { "value": "non-woven", "label": "Флизелиновые" },
+      { "value": "paper", "label": "Бумажные" }
+    ],
+    "Ванны": [
+      { "value": "acrylic", "label": "Акриловые" },
+      { "value": "cast-iron", "label": "Чугунные" },
+      { "value": "steel", "label": "Стальные" }
+    ],
+    "Сантехника": [
+      { "value": "mixer", "label": "Смесители" },
+      { "value": "toilet", "label": "Унитазы" },
+      { "value": "sink", "label": "Раковины" }
+    ],
+    "Электрика": [
+      { "value": "socket", "label": "Розетки" },
+      { "value": "switch", "label": "Выключатели" },
+      { "value": "cable", "label": "Кабели" }
+    ],
+    "Крепёж": [
+      { "value": "screw", "label": "Саморезы" },
+      { "value": "dowel", "label": "Дюбели" },
+      { "value": "anchor", "label": "Анкеры" }
+    ]
+  }
+}
