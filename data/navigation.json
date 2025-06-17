@@ -26,8 +26,8 @@
     },
     {
       "id": 5,
-      "name": "Крепёж",
-      "url": "/fasteners",
+      "name": "Мебель",
+      "url": "/furniture",
       "color": "#9d4e5f"
     },
     {
@@ -39,7 +39,7 @@
   ],
   "contacts": {
     "phone": "+734676 20022",
-    "email": "vizitura1@yandex.ru",
+    "email": "vizituray@yandex.ru",
     "address": "г. Урай мкр 1Д, дом 75А"
   },
   "social": {

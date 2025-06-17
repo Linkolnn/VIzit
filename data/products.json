@@ -635,7 +635,7 @@
       "image": "/images/products/fasteners1.svg",
       "brand": "/images/brand/hilti.jpg",
       "collection": "Standard",
-      "category": "Крепёж",
+      "category": "Мебель",
       "specifications": {
         "Тип товара": "Саморезы",
         "Бренд": "Hilti",
@@ -668,7 +668,7 @@
       "image": "/images/products/fasteners2.svg",
       "brand": "/images/brand/fischer.jpg",
       "collection": "DuoPower",
-      "category": "Крепёж",
+      "category": "Мебель",
       "specifications": {
         "Тип товара": "Дюбели",
         "Бренд": "Fischer",
@@ -699,7 +699,7 @@
       "image": "/images/products/fasteners3.svg",
       "brand": "/images/brand/sormat.jpg",
       "collection": "S-KA",
-      "category": "Крепёж",
+      "category": "Мебель",
       "specifications": {
         "Тип товара": "Анкерные болты",
         "Бренд": "Sormat",
@@ -730,7 +730,7 @@
       "image": "/images/products/fasteners4.svg",
       "brand": "/images/brand/gost.jpg",
       "collection": "Standard",
-      "category": "Крепёж",
+      "category": "Мебель",
       "specifications": {
         "Тип товара": "Гвозди",
         "Бренд": "GOST",

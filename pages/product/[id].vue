@@ -40,7 +40,8 @@
               <div class="product-details__meta">
                 <div class="product-details__meta-item">
                   <span class="product-details__meta-label">Бренд:</span>
-                  <span class="product-details__meta-value">{{ product.brand }}</span>
+                  <img class="product-details__meta-value" :src="product.brand" alt="Мзображение бренда">
+                  
                 </div>
                 <div class="product-details__meta-item">
                   <span class="product-details__meta-label">Коллекция:</span>
