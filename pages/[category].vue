@@ -136,12 +136,17 @@ function handleFiltersUpdate(filters) {
 }
 
 // Page title and meta
-useHead({
-  title: `${categoryName.value} - ВИЗИТ`,
+useHead(() => ({
+  title: `${categoryName.value} - магазин ВИЗИТ`,
   meta: [
-    { name: 'description', content: `${categoryName.value} - широкий выбор товаров в магазине ВИЗИТ` }
+    { name: 'description', content: `${categoryName.value} в Урае - широкий выбор товаров в магазине ВИЗИТ по адресу: г. Урай мкр 1Д, дом 75А. Доступные цены, качественные товары.` },
+    { name: 'keywords', content: `${categoryName.value} Урай, купить ${categoryName.value.toLowerCase()} в Урае, магазин ${categoryName.value.toLowerCase()} Урай, ВИЗИТ Урай` },
+    { property: 'og:title', content: `${categoryName.value} Урай - магазин ВИЗИТ` },
+    { property: 'og:description', content: `${categoryName.value} в Урае - широкий выбор товаров в магазине ВИЗИТ по адресу: г. Урай мкр 1Д, дом 75А. Доступные цены, качественные товары.` },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:url', content: `https://vizit-uray.vercel.app/${categoryUrl.value}` }
   ]
-});
+}));
 </script>
 
 <style lang="sass">

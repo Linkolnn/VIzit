@@ -15,7 +15,23 @@
           </div>
         </div>
         <div class="promo__content">
-          <p class="promo__text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus iure mollitia facilis, dolores dicta quisquam velit incidunt natus. Quo ea magnam voluptate odio libero itaque laudantium sed nulla incidunt vel?</p>
+          <p class="promo__text">Магазин «ВИЗИТ» в городе Урай – ваш надежный партнер в выборе строительных и отделочных материалов. У нас представлен широкий ассортимент обоев, красок, сантехники, ванн, электрики и мебели. Наши специалисты помогут подобрать всё необходимое для вашего ремонта. Приходите к нам по адресу: г. Урай мкр 1Д, дом 75А.</p>
+        </div>
+      </section>
+
+      <!-- Categories Section -->
+      <section class="section categories">
+        <h2 class="section-title">Наши категории товаров</h2>
+        <div class="categories-grid">
+          <NuxtLink v-for="category in categories" :key="category.id" :to="category.url" class="category-card">
+            <div class="category-card__image-wrapper">
+              <img :src="category.image" :alt="category.name + ' Урай'" class="category-card__image">
+            </div>
+            <div class="category-card__content">
+              <h3 class="category-card__title">{{ category.name }}</h3>
+              <p class="category-card__description">{{ category.description }}</p>
+            </div>
+          </NuxtLink>
         </div>
       </section>
 
@@ -48,7 +64,7 @@ const categories = computed(() => {
   return navigationStore.categoryList.map(category => ({
     ...category,
     image: `/images/categories/${category.url.replace('/', '')}.svg`,
-    description: 'Широкий выбор товаров для вашего ремонта'
+    description: `Широкий выбор ${category.name.toLowerCase()} для вашего ремонта в Урае`
   }));
 });
 </script>
@@ -116,6 +132,28 @@ const categories = computed(() => {
   
   @include mobile
     font-size: 14px
+
+.categories
+  margin-bottom: 40px
+
+.section-title
+  text-align: center
+  font-size: 32px
+  margin-bottom: 30px
+  
+  @include mobile
+    font-size: 24px
+
+.categories-grid
+  display: grid
+  grid-template-columns: repeat(3, 1fr)
+  gap: 20px
+  
+  @include tablet
+    grid-template-columns: repeat(2, 1fr)
+  
+  @include mobile
+    grid-template-columns: 1fr
 
 .category-card
   display: block

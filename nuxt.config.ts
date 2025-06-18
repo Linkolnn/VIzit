@@ -56,14 +56,23 @@ export default defineNuxtConfig({
   
   app: {
     head: {
-      title: 'ВИЗИТ - Строительные Отделочные Материалы',
+      title: 'ВИЗИТ Урай - Строительные Отделочные Материалы',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { hid: 'description', name: 'description', content: 'ВИЗИТ - магазин строительных и отделочных материалов. Широкий выбор обоев, красок, сантехники и других товаров для ремонта.' },
+        { hid: 'description', name: 'description', content: 'ВИЗИТ - магазин строительных и отделочных материалов в Урае. Широкий выбор обоев, красок, сантехники, ванн, электрики, мебели и других товаров для ремонта. Адрес: г. Урай мкр 1Д, дом 75А' },
+        { hid: 'keywords', name: 'keywords', content: 'Визит Урай, Обои Урай, Ванны Урай, Сантехника Урай, Электрика Урай, Мебель Урай, Краски Урай, строительные материалы Урай, отделочные материалы' },
+        { name: 'geo.placename', content: 'Урай' },
+        { name: 'geo.region', content: 'RU-KHM' },
+        { name: 'geo.position', content: '60.1333,64.8' },
+        { property: 'og:title', content: 'ВИЗИТ Урай - Строительные и Отделочные Материалы' },
+        { property: 'og:description', content: 'ВИЗИТ - магазин строительных и отделочных материалов в Урае. Широкий выбор обоев, красок, сантехники, ванн, электрики, мебели и других товаров для ремонта. Адрес: г. Урай мкр 1Д, дом 75А' },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:locale', content: 'ru_RU' }
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'canonical', href: 'https://vizit-uray.vercel.app' }
       ],
     },
   },
