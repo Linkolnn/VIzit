@@ -19,22 +19,6 @@
         </div>
       </section>
 
-      <!-- Categories Section -->
-      <section class="section categories">
-        <h2 class="section-title">Наши категории товаров</h2>
-        <div class="categories-grid">
-          <NuxtLink v-for="category in categories" :key="category.id" :to="category.url" class="category-card">
-            <div class="category-card__image-wrapper">
-              <img :src="category.image" :alt="category.name + ' Урай'" class="category-card__image">
-            </div>
-            <div class="category-card__content">
-              <h3 class="category-card__title">{{ category.name }}</h3>
-              <p class="category-card__description">{{ category.description }}</p>
-            </div>
-          </NuxtLink>
-        </div>
-      </section>
-
       <!-- Map Section -->
       <section class="section map-section">
         <div class="map-section__title-container">
