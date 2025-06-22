@@ -37,35 +37,33 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <nav ref="navMenu" class="nav__menu">
-      <div class="nav__menu-content">
-          <ul class="nav__list">
-              <li v-for="item in navMenuItems" :key="item.id" class="nav__list-item">
-                  <NuxtLink @click="handleNavClick" 
-                      class="nav__list-link" 
-                      :to="item.url"
-                      :style="{ backgroundColor: item.color }"
-                  >
-                      {{ item.name }}
-                  </NuxtLink>
-              </li>
-          </ul>
-          <div class="nav__contacts-mobile">
-              <div class="nav__logo-mobile">
-                  <img src="/assets/icons/Logo-white.svg" alt="Визит" class="nav__logo-mobile-icon">
-              </div>
-              <NuxtLink class="nav__contact-mobile" :to="`tel:${contacts.phone}`">{{ contacts.phone }}</NuxtLink>
-              <p class="nav__contact-mobile">{{ contacts.address }}</p>
-              <NuxtLink class="nav__contact-mobile" :to="`mailto:${contacts.email}`">{{ contacts.email }}</NuxtLink>
-              <div class="nav__social">
-                  <NuxtLink :to="social.telegram" target="_blank" class="nav__social-link">
-                      <img src="/assets/icons/telegram.svg" alt="Telegram" class="nav__social-icon">
-                  </NuxtLink>
-                  <NuxtLink :to="social.vk" target="_blank" class="nav__social-link">
-                      <img src="/assets/icons/vk.svg" alt="VK" class="nav__social-icon">
-                  </NuxtLink>
-              </div>
-          </div>
-      </div>
+    <ul class="nav__list">
+        <li v-for="item in navMenuItems" :key="item.id" class="nav__list-item">
+            <NuxtLink @click="handleNavClick" 
+                class="nav__list-link" 
+                :to="item.url"
+                :style="{ backgroundColor: item.color }"
+            >
+                {{ item.name }}
+            </NuxtLink>
+        </li>
+    </ul>
+    <div class="nav__contacts-mobile">
+        <div class="nav__logo-mobile">
+            <img src="/assets/icons/Logo-white.svg" alt="Визит" class="nav__logo-mobile-icon">
+        </div>
+        <NuxtLink class="nav__contact-mobile" :to="`tel:${contacts.phone}`">{{ contacts.phone }}</NuxtLink>
+        <p class="nav__contact-mobile">{{ contacts.address }}</p>
+        <NuxtLink class="nav__contact-mobile" :to="`mailto:${contacts.email}`">{{ contacts.email }}</NuxtLink>
+        <div class="nav__social">
+            <NuxtLink :to="social.telegram" target="_blank" class="nav__social-link">
+                <img src="/assets/icons/telegram.svg" alt="Telegram" class="nav__social-icon">
+            </NuxtLink>
+            <NuxtLink :to="social.vk" target="_blank" class="nav__social-link">
+                <img src="/assets/icons/vk.svg" alt="VK" class="nav__social-icon">
+            </NuxtLink>
+        </div>
+    </div>
   </nav>
 </template>
 <style lang="sass">
@@ -146,17 +144,14 @@ onBeforeUnmount(() => {
     width: 100%
     z-index: 1000
     overflow-y: auto
+    display: flex
+    flex-direction: column
     padding: 0
     will-change: transform
 
-  .nav__menu-content
-    display: flex
-    flex-direction: column
-    height: 100%
-
   .nav__logo-mobile
     display: block
-    margin-bottom: 30px
+    margin-bottom: 10px
     text-align: center
 
   .nav__logo-mobile-icon
@@ -218,4 +213,8 @@ onBeforeUnmount(() => {
     display: flex
     margin-top: 20px
     justify-content: center
+
+  .nav__social-icon
+    width: 45px
+    height: 45px
 </style>

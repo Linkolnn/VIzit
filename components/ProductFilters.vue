@@ -202,6 +202,8 @@ watch(() => props.category, (newCategory) => {
   min-width: 200px
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3)
   margin-top: 5px
+  width: 200px
+  max-width: 200px
   
   .filter-options
     padding: 10px
@@ -232,6 +234,7 @@ watch(() => props.category, (newCategory) => {
   display: inline-block
   width: 20px
   height: 20px
+  min-width: 20px
   margin-right: 10px
   border: 2px solid #444
   background-color: #333

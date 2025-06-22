@@ -21,11 +21,14 @@ const props = defineProps({
   alt: {
     type: String,
     default: 'Banner image'
-  },
-  isVideo: {
-    type: Boolean,
-    default: false
   }
+});
+
+// Определяем, является ли файл видео или изображением по расширению
+const isVideo = computed(() => {
+  const videoExtensions = ['mp4', 'webm', 'ogg'];
+  const ext = props.media.split('.').pop().toLowerCase();
+  return videoExtensions.includes(ext);
 });
 </script>
 

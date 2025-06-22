@@ -112,6 +112,9 @@ onBeforeUnmount(() => {
   padding: 15px 0
 
 .footer__logo-wrapper
+  display: flex
+  flex-direction: column
+  align-items: center
   text-align: center
 
 .footer__logo-link

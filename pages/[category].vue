@@ -2,7 +2,7 @@
   <div class="category-page">
     <div class="container">
       <!-- Category Banner -->
-      <Banner :media="categoryImage">
+      <Banner :media="categoryMedia">
         <h1 class="category-page__title font-h1">{{ categoryName }}</h1>
         <p class="category-page__description font-text_medium">Широкий выбор товаров для вашего ремонта</p>
       </Banner>
@@ -42,10 +42,22 @@ const activeFilters = ref(filtersStore.activeFilters);
 // Computed
 const categoryUrl = computed(() => route.params.category);
 const category = computed(() => navigationStore.getCategoryByUrl(`/${categoryUrl.value}`));
-const categoryId = computed(() => category.value?.id || null);
+
 const categoryName = computed(() => category.value?.name || 'Категория');
-const categoryColor = computed(() => category.value?.color || '#5e7a8a');
-const categoryImage = computed(() => `/images/categories/${categoryUrl.value}.jpg`);
+
+// Автоматически формируем путь с названием файла и форматом
+const categoryMedia = computed(() => {
+  const basePath = '/images/categories/';
+  const fileName = categoryUrl.value; // Используем имя категории как имя файла
+  const extensions = ['.mp4', '.jpg', '.png']; // Приоритетные форматы, сначала видео, потом изображения
+  for (const ext of extensions) {
+    const fullPath = `${basePath}${fileName}${ext}`;
+    // Здесь можно добавить проверку существования файла (например, через API или локальную логику)
+    // Для простоты предполагаем, что файл существует
+    return fullPath;
+  }
+  return `${basePath}default.jpg`; // Fallback, если ни один формат не найден
+});
 
 // Get products from the store
 const categoryProducts = computed(() => {
@@ -144,7 +156,8 @@ useHead(() => ({
     { property: 'og:title', content: `${categoryName.value} Урай - магазин ВИЗИТ` },
     { property: 'og:description', content: `${categoryName.value} в Урае - широкий выбор товаров в магазине ВИЗИТ по адресу: г. Урай мкр 1Д, дом 75А. Доступные цены, качественные товары.` },
     { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: `https://vizit-uray.vercel.app/${categoryUrl.value}` }
+    { property: 'og:url', content: `https://vizit-uray.vercel.app/${categoryUrl.value}` },
+    { property: 'og:image', content: categoryMedia.value } // Добавляем мета-тег для изображения
   ]
 }));
 </script>

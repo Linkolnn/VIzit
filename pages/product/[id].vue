@@ -105,10 +105,9 @@
 <script setup>
 import { useNavigationStore } from '@/stores/navigation';
 import { useProductsStore } from '@/stores/products';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const router = useRouter();
 const navigationStore = useNavigationStore();
 const productsStore = useProductsStore();
 const social = computed(() => navigationStore.socialLinks);
@@ -312,12 +311,12 @@ useHead({
   color: $text-secondary
 
 .product-details__meta-value
+  max-width: 80px
   color: $text-primary
 
 .product-details__price-block
   display: flex
   align-items: center
-  margin-bottom: 20px
 
 .product-details__price
   font-size: 32px
@@ -439,7 +438,6 @@ useHead({
   .product-specs__actions
     &--mobile
       display: flex
-      margin-block: 20px
       
     &--desktop
       display: none

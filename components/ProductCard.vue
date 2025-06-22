@@ -105,9 +105,9 @@ const formatPrice = (price) => {
 
 .product-card__brand
   position: absolute
-  bottom: -1px
-  right: -1px
-  width: 80px
+  bottom: -3px
+  right: 0px
+  max-width: 105px
   height: 30px
   border-radius: 15px 0 15px 0
   overflow: hidden
@@ -124,21 +124,27 @@ const formatPrice = (price) => {
   padding: 0 5px
   display: flex
   flex-direction: column
-  gap: 20px
+  gap: 10px
   flex-grow: 1
 
 .product-card__title
-  font-size: 18px
+  font-size: 20px
   font-weight: 600
   color: $white
   line-height: 1.2
   flex-grow: 1
 
 .product-card__description
-  font-size: 14px
+  max-height: 65px
+  font-size: 16px
   color: rgba(255, 255, 255, 0.8)
   flex-grow: 1
   line-height: 1.3
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Максимум 3 строки */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
 .product-card__footer
   display: flex
@@ -152,7 +158,7 @@ const formatPrice = (price) => {
   align-items: flex-start
 
 .product-card__price
-  font-size: 36px
+  font-size: 34px
   font-weight: 700
   margin: 0
   color: $white

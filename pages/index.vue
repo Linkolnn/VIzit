@@ -11,7 +11,7 @@
             <h2 class="promo__title">начни ремонт с<span class="promo__title-accent">ВИЗИТ</span></h2>
           </div>
           <div class="promo__image-wrapper">
-            <img src="/images/categories/studio.svg" alt="Студия подбора цвета" class="promo__image">
+            <img src="/images/categories/studio.jpg" alt="Студия подбора цвета" class="promo__image">
           </div>
         </div>
         <div class="promo__content">
@@ -31,26 +31,13 @@
 </template>
 
 <script setup>
-import { useNavigationStore } from '@/stores/navigation';
 import { useSlidesStore } from '@/stores/slides';
-import { useFeaturedProductsStore } from '@/stores/featured-products';
 
-const navigationStore = useNavigationStore();
 const slidesStore = useSlidesStore();
-const featuredProductsStore = useFeaturedProductsStore();
 
 // Get data from stores
 const sliderData = computed(() => slidesStore.getSlides);
-const featuredProducts = computed(() => featuredProductsStore.getFeaturedProducts);
 
-// Categories with images
-const categories = computed(() => {
-  return navigationStore.categoryList.map(category => ({
-    ...category,
-    image: `/images/categories/${category.url.replace('/', '')}.svg`,
-    description: `Широкий выбор ${category.name.toLowerCase()} для вашего ремонта в Урае`
-  }));
-});
 </script>
 
 <style lang="sass">
