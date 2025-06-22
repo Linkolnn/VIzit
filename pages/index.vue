@@ -102,7 +102,7 @@ const sliderData = computed(() => slidesStore.getSlides);
   line-height: 1.6
   
   @include mobile
-    font-size: 14px
+    font-size: 18px
 
 .categories
   margin-bottom: 40px

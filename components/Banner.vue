@@ -1,7 +1,7 @@
 <template>
   <div class="banner" :class="{ 'banner--video': isVideo }">
     <div v-if="isVideo" class="banner__video-wrapper">
-      <video class="banner__video" :src="media" autoplay muted loop></video>
+      <video class="banner__video" :src="media" autoplay muted playsinline loading="lazy" loop></video>
     </div>
     <div v-else class="banner__image-wrapper">
       <img class="banner__image" :src="media" :alt="alt">

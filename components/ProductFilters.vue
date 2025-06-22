@@ -27,7 +27,7 @@
     </div>
 
     <!-- Группировка -->
-    <div class="filter-group">
+    <!-- <div class="filter-group">
       <div class="filter-header" @click="toggleFilter('group')">
         <h3 class="filter-title">Группировка: <span>{{ filtersStore.selectedGroupsLabel }}</span></h3>
         <div class="filter-toggle" :class="{ 'is-open': filtersStore.openFilters.group }">
@@ -50,7 +50,7 @@
           </label>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Производитель -->
     <div class="filter-group">
