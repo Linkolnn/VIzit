@@ -71,7 +71,8 @@ export default defineNuxtConfig({
         { property: 'og:title', content: 'ВИЗИТ Урай - Строительные и Отделочные Материалы' },
         { property: 'og:description', content: 'ВИЗИТ - магазин строительных и отделочных материалов в Урае. Широкий выбор обоев, красок, сантехники, ванн, электрики, мебели и других товаров для ремонта. Адрес: г. Урай мкр 1Д, дом 75А' },
         { property: 'og:type', content: 'website' },
-        { property: 'og:locale', content: 'ru_RU' }
+        { property: 'og:locale', content: 'ru_RU' },
+        { property: 'og:image', content: '/favicon.ico' }
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
