@@ -7,7 +7,7 @@
   >
     <div class="product-card__image-wrapper">
       <img :src="product.image" :alt="product.title" class="product-card__image">
-      <div class="product-card__brand" v-if="product.brand">
+      <div :style="{ background: categoryColor }" class="product-card__brand" v-if="product.brand">
         <img :src="product.brand" :alt="product.title" class="product-card__brand-logo">
       </div>
     </div>
@@ -99,17 +99,20 @@ const formatPrice = (price) => {
   align-items: center
 
 .product-card__image
-  width: 80%
-  height: 80%
-  object-fit: contain
+  width: 100%
+  height: 100%
+  object-fit: cover
+  border-radius: $radius
 
 .product-card__brand
   position: absolute
   bottom: -3px
-  right: 0px
+  right: -2px
   max-width: 105px
+  min-width: 65px
   height: 30px
   border-radius: 15px 0 15px 0
+  padding: 3px
   overflow: hidden
   display: flex
   justify-content: center
@@ -118,6 +121,9 @@ const formatPrice = (price) => {
 .product-card__brand-logo
   width: 100%
   height: 100%
+  border-radius: 15px 0 15px 0
+  padding: 1px
+  background: #fff
   object-fit: contain
 
 .product-card__content
@@ -133,6 +139,11 @@ const formatPrice = (price) => {
   color: $white
   line-height: 1.2
   flex-grow: 1
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Максимум 3 строки */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
 .product-card__description
   max-height: 65px

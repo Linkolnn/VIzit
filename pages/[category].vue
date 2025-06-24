@@ -2,7 +2,7 @@
   <div class="category-page">
     <div class="container">
       <!-- Category Banner -->
-      <Banner :media="categoryMedia">
+      <Banner :media="categoryMediaPaths">
         <h1 class="category-page__title font-h1">{{ categoryName }}</h1>
         <p class="category-page__description font-text_medium">Широкий выбор товаров для вашего ремонта</p>
       </Banner>
@@ -45,18 +45,32 @@ const category = computed(() => navigationStore.getCategoryByUrl(`/${categoryUrl
 
 const categoryName = computed(() => category.value?.name || 'Категория');
 
-// Автоматически формируем путь с названием файла и форматом
-const categoryMedia = computed(() => {
+// Возвращаем массив возможных путей для медиафайлов категории
+const categoryMediaPaths = computed(() => {
   const basePath = '/images/categories/';
   const fileName = categoryUrl.value; // Используем имя категории как имя файла
-  const extensions = ['.mp4', '.jpg', '.png']; // Приоритетные форматы, сначала видео, потом изображения
-  for (const ext of extensions) {
-    const fullPath = `${basePath}${fileName}${ext}`;
-    // Здесь можно добавить проверку существования файла (например, через API или локальную логику)
-    // Для простоты предполагаем, что файл существует
-    return fullPath;
-  }
-  return `${basePath}default.jpg`; // Fallback, если ни один формат не найден
+  // Проверяем наличие файлов в порядке приоритета
+  // Для каждой категории используем оптимальный формат
+  let extensions = [];
+  
+  // Для обоев у нас есть webm
+  if (categoryUrl.value === 'wallpaper') {
+    extensions = ['.webm', '.mp4', '.jpg', '.png'];
+  } else if (categoryUrl.value === 'paint') {
+    // Для красок у нас есть mp4
+    extensions = ['.mp4', '.webm', '.jpg', '.png'];
+  } else {
+    // Для остальных категорий сначала проверяем изображения
+    extensions = ['.jpg', '.png', '.svg', '.mp4', '.webm'];
+  } 
+  
+  // Формируем массив путей с разными расширениями
+  const paths = extensions.map(ext => `${basePath}${fileName}${ext}`);
+  
+  // Добавляем запасной вариант
+  paths.push('/images/categories/default.jpg');
+  
+  return paths;
 });
 
 // Get products from the store
@@ -157,7 +171,7 @@ useHead(() => ({
     { property: 'og:description', content: `${categoryName.value} в Урае - широкий выбор товаров в магазине ВИЗИТ по адресу: г. Урай мкр 1Д, дом 75А. Доступные цены, качественные товары.` },
     { property: 'og:type', content: 'website' },
     { property: 'og:url', content: `https://vizit-uray.vercel.app/${categoryUrl.value}` },
-    { property: 'og:image', content: categoryMedia.value } // Добавляем мета-тег для изображения
+    { property: 'og:image', content: `/images/categories/${categoryUrl.value}.jpg` } // Используем jpg для превью
   ]
 }));
 </script>

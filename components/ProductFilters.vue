@@ -202,8 +202,7 @@ watch(() => props.category, (newCategory) => {
   min-width: 200px
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3)
   margin-top: 5px
-  width: 200px
-  max-width: 200px
+  max-width: 235px
   
   .filter-options
     padding: 10px
@@ -286,11 +285,10 @@ input[type="checkbox"]:checked ~ .checkbox-custom:after
 
 .manufacturer-logo
   display: inline-block
-  width: 50%
+  max-width: 50%
   height: 24px
   margin-right: 5px
   border-radius: 3px
-  background-color: white
   
   img
     width: 100%
