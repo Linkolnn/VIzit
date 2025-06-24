@@ -1,18 +1,18 @@
 {
   "slides": [
     {
-      "image": "/images/slider/slide1.jpg",
-      "title": "Подберите цвет для вашего интерьера",
-      "description": "В ВИЗИТ вы можете подобрать цвет краски, обоев или других материалов",
-      "buttonText": "Подробнее",
-      "buttonLink": "/about"
-    },
-    {
       "image": "/images/slider/slide2.jpg",
       "title": "Широкий выбор строительных материалов",
       "description": "Всё для вашего ремонта в одном месте",
       "buttonText": "Каталог",
       "buttonLink": "/products"
+    },
+    {
+      "image": "/images/slider/slide1.jpg",
+      "title": "Подберите цвет для вашего интерьера",
+      "description": "В ВИЗИТ вы можете подобрать цвет краски, обоев или других материалов",
+      "buttonText": "Подробнее",
+      "buttonLink": "/about"
     }
   ]
 }

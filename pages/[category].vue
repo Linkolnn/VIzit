@@ -49,20 +49,10 @@ const categoryName = computed(() => category.value?.name || 'Категория'
 const categoryMediaPaths = computed(() => {
   const basePath = '/images/categories/';
   const fileName = categoryUrl.value; // Используем имя категории как имя файла
-  // Проверяем наличие файлов в порядке приоритета
-  // Для каждой категории используем оптимальный формат
-  let extensions = [];
   
-  // Для обоев у нас есть webm
-  if (categoryUrl.value === 'wallpaper') {
-    extensions = ['.webm', '.mp4', '.jpg', '.png'];
-  } else if (categoryUrl.value === 'paint') {
-    // Для красок у нас есть mp4
-    extensions = ['.mp4', '.webm', '.jpg', '.png'];
-  } else {
-    // Для остальных категорий сначала проверяем изображения
-    extensions = ['.jpg', '.png', '.svg', '.mp4', '.webm'];
-  } 
+  // Проверяем все форматы в порядке приоритета
+  // Сначала видео, потом изображения
+  const extensions = ['.webm', '.mp4', '.jpg', '.png', '.svg']; 
   
   // Формируем массив путей с разными расширениями
   const paths = extensions.map(ext => `${basePath}${fileName}${ext}`);

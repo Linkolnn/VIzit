@@ -2,9 +2,9 @@
   <div class="banner" :class="{ 'banner--video': isVideo }">
     <div v-if="isVideo" class="banner__video-wrapper">
       <video 
-        v-if="currentMedia"
         ref="videoRef"
         class="banner__video" 
+        :key="currentMedia"
         :src="currentMedia" 
         autoplay 
         muted 
@@ -12,16 +12,18 @@
         loading="lazy" 
         loop
         @error="handleMediaError"
+        @loadeddata="handleMediaLoad"
       ></video>
     </div>
     <div v-else class="banner__image-wrapper">
       <img 
-        v-if="currentMedia"
         ref="imageRef"
         class="banner__image" 
+        :key="currentMedia"
         :src="currentMedia" 
         :alt="alt"
         @error="handleMediaError"
+        @load="handleMediaLoad"
       >
     </div>
     <div class="banner__content">
@@ -51,10 +53,11 @@ const mediaSources = computed(() => {
 
 // Текущий индекс медиа-источника
 const currentMediaIndex = ref(0);
+const mediaLoaded = ref(false);
 
 // Текущий медиа-источник
 const currentMedia = computed(() => {
-  if (mediaSources.value.length === 0) return '';
+  if (mediaSources.value.length === 0) return '/images/categories/default.jpg';
   return mediaSources.value[currentMediaIndex.value];
 });
 
@@ -67,8 +70,7 @@ const isVideo = computed(() => {
 });
 
 // Обработчик ошибки загрузки медиа
-function handleMediaError() {
-  // Тихо обрабатываем ошибку без вывода в консоль
+function handleMediaError(event) {
   tryNextMedia();
 }
 
@@ -76,76 +78,89 @@ function handleMediaError() {
 function tryNextMedia() {
   if (currentMediaIndex.value < mediaSources.value.length - 1) {
     currentMediaIndex.value++;
-  }
+  } 
 }
 
-// Проверяем доступность файла
-async function checkMediaAvailability(url) {
+// Обработчик успешной загрузки медиа
+function handleMediaLoad() {
+  mediaLoaded.value = true;
+}
+
+// Проверка доступности файла
+async function checkFileExists(url) {
   try {
-    // Используем fetch с опцией catch для подавления ошибок в консоли
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 1000); // Timeout after 1 second
-    
     const response = await fetch(url, { 
       method: 'HEAD',
-      signal: controller.signal,
-      // Предотвращаем логирование ошибок в консоль
       cache: 'no-store'
-    }).catch(() => ({ ok: false }));
-    
-    clearTimeout(timeoutId);
+    });
     return response.ok;
   } catch (error) {
-    // Тихо обрабатываем ошибку без вывода в консоль
     return false;
   }
 }
 
-// Ссылки на элементы
-const videoRef = ref(null);
-const imageRef = ref(null);
-
-// Проверяем доступность первого медиа-источника при монтировании компонента
+// При монтировании компонента
 onMounted(async () => {
+  
+  for (let i = 0; i < mediaSources.value.length; i++) {
+    const url = mediaSources.value[i];
+    const exists = await checkFileExists(url);
+    if (exists) {
+      currentMediaIndex.value = i;
+      return;
+    } 
+  }
+  
+  // Если ни один формат не найден, используем последний (обычно fallba
   if (mediaSources.value.length > 0) {
-    // Проверяем все источники по очереди, пока не найдем доступный
-    let foundValid = false;
-    
-    for (let i = 0; i < mediaSources.value.length; i++) {
-      const isAvailable = await checkMediaAvailability(mediaSources.value[i]);
-      if (isAvailable) {
-        currentMediaIndex.value = i;
-        foundValid = true;
-        break;
-      }
-    }
-    
-    // Если ни один источник не доступен, используем последний (обычно это fallback)
-    if (!foundValid && mediaSources.value.length > 0) {
-      currentMediaIndex.value = mediaSources.value.length - 1;
-    }
+    currentMediaIndex.value = mediaSources.value.length - 1;
   }
 });
 
 // Следим за изменением источников медиа
 watch(() => props.media, async () => {
-  // Проверяем все источники по очереди, пока не найдем доступный
-  let foundValid = false;
+  mediaLoaded.value = false;
   
   for (let i = 0; i < mediaSources.value.length; i++) {
-    const isAvailable = await checkMediaAvailability(mediaSources.value[i]);
-    if (isAvailable) {
+    const url = mediaSources.value[i];
+    const exists = await checkFileExists(url);
+    if (exists) {
       currentMediaIndex.value = i;
-      foundValid = true;
-      break;
-    }
+      return;
+    } 
   }
   
-  // Если ни один источник не доступен, используем последний (обычно это fallback)
-  if (!foundValid && mediaSources.value.length > 0) {
+  // Если ни один формат не найден, используем последний
+  if (mediaSources.value.length > 0) {
     currentMediaIndex.value = mediaSources.value.length - 1;
   }
 }, { deep: true });
+
+// Подавление ошибок в консоли для медиа
+onMounted(() => {
+  // Перехватываем все ошибки загрузки медиа
+  const originalAddEventListener = window.EventTarget.prototype.addEventListener;
+  window.EventTarget.prototype.addEventListener = function(type, listener, options) {
+    if (type === 'error' && this instanceof HTMLImageElement || this instanceof HTMLVideoElement) {
+      const originalListener = listener;
+      listener = function(event) {
+        if (event.target.src && event.target.src.includes('/images/categories/')) {
+          // Для наших медиа-файлов подавляем ошибки в консоли
+          event.preventDefault();
+          event.stopPropagation();
+        } else {
+          // Для остальных файлов используем обычное поведение
+          return originalListener.apply(this, arguments);
+        }
+      };
+    }
+    return originalAddEventListener.call(this, type, listener, options);
+  };
+});
+
+// Ссылки на элементы
+const videoRef = ref(null);
+const imageRef = ref(null);
 </script>
 
 <style lang="sass">
