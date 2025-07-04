@@ -53,7 +53,7 @@
                 </div>
               </div>
               
-              <div class="product-details__price-block">
+              <div v-if="product.price" class="product-details__price-block">
                 <p class="product-details__price">{{ formatPrice(product.price) }} ₽</p>
               </div>
             </div>
@@ -295,11 +295,11 @@ useHead({
   color: $text-primary
 
 .product-details__meta
-  margin-bottom: 20px
-  padding-bottom: 20px
+  margin-bottom: 10px
 
 .product-details__meta-item
   display: flex
+  align-items: center
   margin-bottom: 10px
   
   &:last-child

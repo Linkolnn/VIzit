@@ -15,13 +15,13 @@
       <h3 class="product-card__title">{{ product.title }}</h3>
       <p class="product-card__description">{{ product.description }}</p>
       <div class="product-card__footer">
-        <div class="product-card__price-block">
+        <div v-if="product.price" class="product-card__price-block">
           <p class="product-card__price"    
         >
           {{ formatPrice(product.price) }} ₽
         </p>
         </div>
-        <NuxtLink :to="`/product/${product.id}`" :style="{ color: categoryColor }" class="product-card__btn">Подробнее</NuxtLink>
+        <NuxtLink class="product-card__btn" :class="{'no-price': !product.price}" :to="`/product/${product.id}`" :style="{ color: categoryColor }">Подробнее</NuxtLink>
       </div>
     </div>
   </article>
@@ -187,10 +187,13 @@ const formatPrice = (price) => {
   font-size: 18px
   text-align: center
   transition: all 0.3s ease
-  white-space: nowrap
-  
+  white-space: nowrap 
+
   &:hover
     background-color: $white
+
+.no-price 
+  width: 100%
 
 @include hover
   .product-card:hover
