@@ -101,13 +101,13 @@
       </div>
 
       <!-- Product Description -->
-      <div v-if="product.fullDescription" class="product-description mt-40">
+      <div v-if="product.fullDescription" class="product-description">
         <h2 class="product-description__title font-h3">Описание</h2>
         <div class="product-description__content font-text_medium" v-html="product.fullDescription"></div>
       </div>
 
       <!-- Similar Products -->
-      <div v-if="similarProducts.length > 0" class="similar-products mt-40">
+      <div v-if="similarProducts.length > 0" class="similar-products">
         <h2 class="similar-products__title font-h3">Похожие товары</h2>
         <div class="products-grid">
           <ProductCard v-for="similarProduct in similarProducts" :key="similarProduct.id" :product="similarProduct" />
@@ -477,8 +477,6 @@ useHead(() => ({
 .product-description
   background-color: $white
   border-radius: $radius
-  padding: 30px
-  margin-bottom: 40px
 
 .product-description__title
   margin: 0 0 20px
