@@ -12,6 +12,9 @@ export const useFiltersStore = defineStore('filters', {
     selectedGroups: [],
     selectedManufacturers: [],
     
+    // Поиск
+    searchQuery: '',
+    
     // Состояние открытых фильтров
     openFilters: {
       sort: false,
@@ -65,7 +68,8 @@ export const useFiltersStore = defineStore('filters', {
       return {
         sort: state.selectedSort,
         groups: state.selectedGroups,
-        manufacturers: state.selectedManufacturers
+        manufacturers: state.selectedManufacturers,
+        search: state.searchQuery
       };
     }
   },
@@ -83,11 +87,17 @@ export const useFiltersStore = defineStore('filters', {
       this.manufacturerOptions = options;
     },
     
+    // Установка поискового запроса
+    setSearchQuery(query) {
+      this.searchQuery = query;
+    },
+    
     // Обновление выбранных фильтров
     updateFilters(filters) {
       if (filters.sort !== undefined) this.selectedSort = filters.sort;
       if (filters.groups !== undefined) this.selectedGroups = filters.groups;
       if (filters.manufacturers !== undefined) this.selectedManufacturers = filters.manufacturers;
+      if (filters.search !== undefined) this.searchQuery = filters.search;
     },
     
     // Переключение состояния фильтра (открыт/закрыт)
@@ -105,9 +115,50 @@ export const useFiltersStore = defineStore('filters', {
       }
     },
     
+    // Функция поиска товаров
+    searchProducts(products, query) {
+      if (!query || !query.trim()) {
+        return products;
+      }
+
+      const searchTerm = query.toLowerCase().trim();
+      
+      return products.filter(product => {
+        // Поиск по названию
+        const titleMatch = product.title?.toLowerCase().includes(searchTerm);
+        
+        // Поиск по описанию
+        const descriptionMatch = product.description?.toLowerCase().includes(searchTerm);
+        
+        // Поиск по спецификациям
+        let specificationsMatch = false;
+        if (product.specifications) {
+          specificationsMatch = Object.values(product.specifications).some(value => {
+            if (typeof value === 'string') {
+              return value.toLowerCase().includes(searchTerm);
+            }
+            return false;
+          });
+        }
+        
+        // Поиск по артикулу
+        const articleMatch = product.article?.toLowerCase().includes(searchTerm);
+        
+        // Поиск по коллекции
+        const collectionMatch = product.collection?.toLowerCase().includes(searchTerm);
+        
+        return titleMatch || descriptionMatch || specificationsMatch || articleMatch || collectionMatch;
+      });
+    },
+    
     // Фильтрация продуктов
     filterProducts(products) {
       let result = [...products];
+      
+      // Применяем поиск сначала
+      if (this.searchQuery && this.searchQuery.trim()) {
+        result = this.searchProducts(result, this.searchQuery);
+      }
       
       // Применяем сортировку
       switch (this.selectedSort) {
@@ -190,6 +241,7 @@ export const useFiltersStore = defineStore('filters', {
       this.selectedSort = 'price-asc';
       this.selectedGroups = [];
       this.selectedManufacturers = [];
+      this.searchQuery = '';
       
       Object.keys(this.openFilters).forEach(key => {
         this.openFilters[key] = false;

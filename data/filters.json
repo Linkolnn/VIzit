@@ -14,7 +14,7 @@
     ],
     "Обои": [
       { "value": "vinyl", "label": "Винил" },
-      { "value": "non-woven", "label": "Флизелиновые" },
+      { "value": "non-woven", "label": "Флизелин" },
       { "value": "paper", "label": "Бумажные" }
     ],
     "Ванны": [
@@ -28,9 +28,7 @@
       { "value": "sink", "label": "Раковины" }
     ],
     "Электрика": [
-      { "value": "socket", "label": "Розетки" },
-      { "value": "switch", "label": "Выключатели" },
-      { "value": "cable", "label": "Кабели" }
+      { "value": "chandelier", "label": "Люстра" }
     ],
     "Мебель": [
       { "value": "screw", "label": "Тумба" },

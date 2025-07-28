@@ -18,7 +18,6 @@
         :alt="product.title" 
         class="product-card__image"
         @load="handleImageLoad"
-        @error="handleImageError"
       >
       
       <!-- Fallback изображение при ошибке -->
@@ -32,7 +31,7 @@
       
       <!-- Логотип бренда -->
       <div 
-        v-if="product.brand && brandLoaded" 
+        v-if="product.brand" 
         :style="{ background: categoryColor }" 
         class="product-card__brand"
       >
@@ -113,12 +112,6 @@ const formatPrice = (price) => {
 const handleImageLoad = () => {
   imageLoaded.value = true
   imageError.value = false
-}
-
-const handleImageError = () => {
-  imageError.value = true
-  imageLoaded.value = false
-  console.warn(`Ошибка загрузки изображения: ${imageSrc.value}`)
 }
 
 // Функция начала загрузки изображения

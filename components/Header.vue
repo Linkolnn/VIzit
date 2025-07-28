@@ -135,7 +135,7 @@ const toggleNavMenu = () => {
   
   &--mobile
     position: absolute
-    right: 15px
+    right: 0px
     top: 50%
     transform: translateY(-50%)
     z-index: 1001

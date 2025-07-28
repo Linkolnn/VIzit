@@ -1,5 +1,37 @@
 <template>
   <div class="product-filters">
+    <!-- Поисковая строка -->
+    <div class="search-group">
+      <div class="search-input-wrapper">
+        <input 
+          type="text" 
+          v-model="searchQuery" 
+          @input="handleSearchInput"
+          placeholder="Поиск товаров..."
+          class="search-input"
+        >
+        <div class="search-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7.33333 12.6667C10.2789 12.6667 12.6667 10.2789 12.6667 7.33333C12.6667 4.38781 10.2789 2 7.33333 2C4.38781 2 2 4.38781 2 7.33333C2 10.2789 4.38781 12.6667 7.33333 12.6667Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 14L11.06 11.06" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div 
+          v-if="searchQuery" 
+          class="search-clear"
+          @click="clearSearch"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.5 3.5L3.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3.5 3.5L10.5 10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div v-if="searchQuery && searchResultsCount !== null" class="search-results-info">
+        Найдено товаров: {{ searchResultsCount }}
+      </div>
+    </div>
+
     <!-- Сортировка -->
     <div class="filter-group">
       <div class="filter-header" @click="toggleFilter('sort')">
@@ -84,6 +116,7 @@
 </template>
 
 <script setup>
+import { ref, computed, watch } from 'vue';
 import { useFiltersStore } from '@/stores/filters';
 
 const props = defineProps({
@@ -101,6 +134,46 @@ const emit = defineEmits(['filtered-products']);
 
 // Используем хранилище Pinia для фильтров
 const filtersStore = useFiltersStore();
+
+// Поисковая строка
+const searchQuery = ref('');
+const searchResultsCount = ref(null);
+
+// Функция поиска товаров
+function searchProducts(products, query) {
+  if (!query.trim()) {
+    return products;
+  }
+
+  const searchTerm = query.toLowerCase().trim();
+  
+  return products.filter(product => {
+    // Поиск по названию
+    const titleMatch = product.title?.toLowerCase().includes(searchTerm);
+    
+    // Поиск по описанию
+    const descriptionMatch = product.description?.toLowerCase().includes(searchTerm);
+    
+    // Поиск по спецификациям
+    let specificationsMatch = false;
+    if (product.specifications) {
+      specificationsMatch = Object.values(product.specifications).some(value => {
+        if (typeof value === 'string') {
+          return value.toLowerCase().includes(searchTerm);
+        }
+        return false;
+      });
+    }
+    
+    // Поиск по артикулу
+    const articleMatch = product.article?.toLowerCase().includes(searchTerm);
+    
+    // Поиск по коллекции
+    const collectionMatch = product.collection?.toLowerCase().includes(searchTerm);
+    
+    return titleMatch || descriptionMatch || specificationsMatch || articleMatch || collectionMatch;
+  });
+}
 
 // Получаем опции производителей из списка товаров
 const manufacturerOptions = computed(() => {
@@ -136,14 +209,37 @@ const manufacturerOptions = computed(() => {
   return options;
 });
 
-// Фильтрованные продукты
+// Фильтрованные продукты с учетом поиска
 const filteredProducts = computed(() => {
-  return filtersStore.filterProducts(props.products);
+  // Сначала применяем поиск
+  const searchFilteredProducts = searchProducts(props.products, searchQuery.value);
+  
+  // Затем применяем остальные фильтры
+  const finalFilteredProducts = filtersStore.filterProducts(searchFilteredProducts);
+  
+  // Обновляем счетчик результатов поиска
+  if (searchQuery.value.trim()) {
+    searchResultsCount.value = finalFilteredProducts.length;
+  } else {
+    searchResultsCount.value = null;
+  }
+  
+  return finalFilteredProducts;
 });
 
 // Методы
 function toggleFilter(filterName) {
   filtersStore.toggleFilter(filterName);
+}
+
+function handleSearchInput() {
+  applyFilters();
+}
+
+function clearSearch() {
+  searchQuery.value = '';
+  searchResultsCount.value = null;
+  applyFilters();
 }
 
 function applyFilters() {
@@ -176,6 +272,59 @@ watch(() => filtersStore.activeFilters, () => {
   justify-content: flex-start
   flex-wrap: wrap
   gap: 15px
+
+.search-group
+  @include tablet
+      width: 100%
+  .search-input-wrapper
+    position: relative
+    width: 100%
+    
+    .search-input
+      width: 100%
+      padding: 12px 45px 12px 40px
+      border: 2px solid $gray
+      border-radius: $radius
+      background: $black
+      font-size: 16px
+      color: $white
+      transition: border-color 0.2s ease, box-shadow 0.2s ease
+      
+      &:focus
+        outline: none
+        border-color: $border-dark
+      
+      &::placeholder
+        color: $white
+    
+    .search-icon
+      position: absolute
+      left: 12px
+      top: 50%
+      transform: translateY(-45%)
+      color: $white
+      pointer-events: none
+    
+    .search-clear
+      position: absolute
+      right: 12px
+      top: 50%
+      transform: translateY(-45%)
+      color: $white
+      cursor: pointer
+      padding: 2px
+      border-radius: 50%
+      transition: color 0.2s ease, background-color 0.2s ease
+      
+      &:hover
+        color: #666
+        background-color: #f5f5f5
+  
+  .search-results-info
+    margin-top: 8px
+    font-size: 14px
+    color: #666
+    font-style: italic
 
 .filter-group
   position: relative
@@ -315,4 +464,8 @@ input[type="checkbox"]:checked ~ .checkbox-custom:after
 @include mobile
   .filter-group
     width: 100%
+  
+  .search-group
+    .search-input-wrapper
+      max-width: 100%
 </style>
