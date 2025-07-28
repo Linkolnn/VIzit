@@ -9,10 +9,11 @@
     "Краски": [
       { "value": "enamel", "label": "Эмаль" },
       { "value": "varnish", "label": "Лаки" },
-      { "value": "water-emulsion", "label": "Водоэмульсионная" }
+      { "value": "water-emulsion", "label": "Водоэмульсионная" },
+      { "value": "water", "label": "Водно-дисперсионная" }
     ],
     "Обои": [
-      { "value": "vinyl", "label": "Виниловые" },
+      { "value": "vinyl", "label": "Винил" },
       { "value": "non-woven", "label": "Флизелиновые" },
       { "value": "paper", "label": "Бумажные" }
     ],
@@ -31,8 +32,8 @@
       { "value": "switch", "label": "Выключатели" },
       { "value": "cable", "label": "Кабели" }
     ],
-    "Крепёж": [
-      { "value": "screw", "label": "Саморезы" },
+    "Мебель": [
+      { "value": "screw", "label": "Тумба" },
       { "value": "dowel", "label": "Дюбели" },
       { "value": "anchor", "label": "Анкеры" }
     ]

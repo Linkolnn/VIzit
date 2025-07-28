@@ -2,7 +2,7 @@
   <div class="category-page">
     <div class="container">
       <!-- Category Banner -->
-      <Banner :media="categoryMediaPaths">
+      <Banner :category-name="categoryName">
         <h1 class="category-page__title font-h1">{{ categoryName }}</h1>
         <p class="category-page__description font-text_medium">Широкий выбор товаров для вашего ремонта</p>
       </Banner>
@@ -12,14 +12,29 @@
         <ProductFilters 
           :category="categoryName" 
           :products="categoryProducts" 
-          @update:filters="handleFiltersUpdate"
+          @filtered-products="handleFilteredProducts"
         />
       </div>
 
       <!-- Products Grid -->
-      <div class="category-page__products">
+      <div class="category-page__products" ref="productsContainer">
         <div class="products-grid">
-          <ProductCard v-for="product in filteredProducts" :key="product.id" :product="product" :category-name="categoryName" />
+          <ProductCard 
+            v-for="product in paginatedProducts" 
+            :key="product.id" 
+            :product="product" 
+            :category-name="categoryName" 
+          />
+        </div>
+        
+        <!-- Loading indicator -->
+        <div v-if="isLoading" class="loading-indicator">
+          <div class="loading-spinner"></div>
+        </div>
+        
+        <!-- No products message -->
+        <div v-if="displayProducts.length === 0 && !isLoading" class="no-products">
+          <p>Товары не найдены</p>
         </div>
       </div>
     </div>
@@ -27,143 +42,199 @@
 </template>
 
 <script setup>
-import { useProductsStore } from '@/stores/products';
-import { useNavigationStore } from '@/stores/navigation';
-import { useFiltersStore } from '@/stores/filters';
+import { useProductsStore } from '@/stores/products'
+import { useNavigationStore } from '@/stores/navigation'
+import { useBannerStore } from '@/stores/banner'
 
-const route = useRoute();
-const navigationStore = useNavigationStore();
-const productsStore = useProductsStore();
-const filtersStore = useFiltersStore();
+const route = useRoute()
+const navigationStore = useNavigationStore()
+const productsStore = useProductsStore()
+const bannerStore = useBannerStore()
 
 // State
-const activeFilters = ref(filtersStore.activeFilters);
+const displayProducts = ref([])
+const currentPage = ref(1)
+const isLoading = ref(false)
+const productsContainer = ref(null)
+const isMobile = ref(false)
 
 // Computed
-const categoryUrl = computed(() => route.params.category);
-const category = computed(() => navigationStore.getCategoryByUrl(`/${categoryUrl.value}`));
+const categoryUrl = computed(() => route.params.category)
+const category = computed(() => navigationStore.getCategoryByUrl(`/${categoryUrl.value}`))
+const categoryName = computed(() => category.value?.name || 'Категория')
 
-const categoryName = computed(() => category.value?.name || 'Категория');
-
-// Возвращаем массив возможных путей для медиафайлов категории
-const categoryMediaPaths = computed(() => {
-  const basePath = '/images/categories/';
-  const fileName = categoryUrl.value; // Используем имя категории как имя файла
-  
-  // Проверяем все форматы в порядке приоритета
-  // Сначала видео, потом изображения
-  const extensions = ['.webm', '.mp4', '.jpg', '.png', '.svg']; 
-  
-  // Формируем массив путей с разными расширениями
-  const paths = extensions.map(ext => `${basePath}${fileName}${ext}`);
-  
-  // Добавляем запасной вариант
-  paths.push('/images/categories/default.jpg');
-  
-  return paths;
-});
+// Adaptive items per page based on screen size
+const itemsPerPage = computed(() => {
+  return isMobile.value ? 5 : 8
+})
 
 // Get products from the store
 const categoryProducts = computed(() => {
   if (categoryName.value) {
-    return productsStore.getProductsByCategory(categoryName.value);
+    return productsStore.getProductsByCategory(categoryName.value)
   }
-  return [];
-});
+  return []
+})
 
-// Фильтрация товаров
-const filteredProducts = computed(() => {
-  let result = [...categoryProducts.value];
-  
-  // Применяем сортировку
-  switch (activeFilters.value.sort) {
-    case 'price-asc':
-      result.sort((a, b) => a.price - b.price);
-      break;
-    case 'price-desc':
-      result.sort((a, b) => b.price - a.price);
-      break;
-    case 'popular':
-      // Здесь можно добавить логику сортировки по популярности
-      // Пока просто оставим текущий порядок
-      break;
-    case 'new':
-      // Здесь можно добавить логику сортировки по новизне
-      // Пока просто используем сортировку по цене
-      result.sort((a, b) => a.price - b.price);
-      break;
-  }
-  
-  // Применяем фильтрацию по группам
-  if (activeFilters.value.groups.length > 0) {
-    result = result.filter(product => {
-      // Определяем группу товара в зависимости от категории
-      let productGroup = '';
-      
-      switch (categoryName.value) {
-        case 'Краски':
-          // Определяем тип краски по спецификациям
-          if (product.specifications) {
-            if (product.specifications['Тип товара']?.toLowerCase().includes('эмаль')) {
-              productGroup = 'enamel';
-            } else if (product.specifications['Тип товара']?.toLowerCase().includes('лак')) {
-              productGroup = 'varnish';
-            } else if (product.specifications['Основа']?.toLowerCase().includes('водн')) {
-              productGroup = 'water-emulsion';
-            }
-          }
-          break;
-        case 'Обои':
-          // Определяем тип обоев по спецификациям
-          if (product.specifications) {
-            if (product.specifications['Материал']?.toLowerCase().includes('винил')) {
-              productGroup = 'vinyl';
-            } else if (product.specifications['Материал']?.toLowerCase().includes('флизелин')) {
-              productGroup = 'non-woven';
-            } else if (product.specifications['Материал']?.toLowerCase().includes('бумаг')) {
-              productGroup = 'paper';
-            }
-          }
-          break;
-        // Аналогично для других категорий
-      }
-      
-      return activeFilters.value.groups.includes(productGroup);
-    });
-  }
-  
-  // Применяем фильтрацию по производителям
-  if (activeFilters.value.manufacturers.length > 0) {
-    result = result.filter(product => {
-      const manufacturer = product.specifications?.Бренд || 
-                          product.brand?.split('/').pop().replace('.jpg', '') || 
-                          'Unknown';
-      return activeFilters.value.manufacturers.includes(manufacturer);
-    });
-  }
-  
-  return result;
-});
+// Paginated products (currently visible products)
+const paginatedProducts = computed(() => {
+  const endIndex = currentPage.value * itemsPerPage.value
+  return displayProducts.value.slice(0, endIndex)
+})
 
-// Обработчик обновления фильтров
-function handleFiltersUpdate(filters) {
-  filtersStore.updateFilters(filters);
-  activeFilters.value = filtersStore.activeFilters;
+// Check if we've reached the end of products
+const hasReachedEnd = computed(() => {
+  return paginatedProducts.value.length >= displayProducts.value.length && displayProducts.value.length > 0
+})
+
+// Check if screen is mobile
+const checkMobileScreen = () => {
+  if (process.client) {
+    isMobile.value = window.innerWidth <= 859
+  }
 }
 
+// Load more products
+const loadMoreProducts = async () => {
+  if (isLoading.value || hasReachedEnd.value) return
+  
+  isLoading.value = true
+  
+  // Simulate loading delay (remove this in production)
+  await new Promise(resolve => setTimeout(resolve, 500))
+  
+  currentPage.value++
+  isLoading.value = false
+}
+
+// Intersection Observer for infinite scroll
+let observer = null
+
+const setupIntersectionObserver = () => {
+  if (!productsContainer.value) return
+  
+  const options = {
+    root: null,
+    rootMargin: '80px', // Start loading 80px before reaching the bottom
+    threshold: 0.1
+  }
+  
+  observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !hasReachedEnd.value) {
+        loadMoreProducts()
+      }
+    })
+  }, options)
+  
+  // Create a sentinel element at the bottom of the products container
+  const sentinel = document.createElement('div')
+  sentinel.style.height = '1px'
+  sentinel.classList.add('scroll-sentinel')
+  productsContainer.value.appendChild(sentinel)
+  
+  observer.observe(sentinel)
+}
+
+// Clean up observer
+const cleanupObserver = () => {
+  if (observer) {
+    observer.disconnect()
+    observer = null
+  }
+  
+  // Remove sentinel element
+  const sentinel = productsContainer.value?.querySelector('.scroll-sentinel')
+  if (sentinel) {
+    sentinel.remove()
+  }
+}
+
+// Handle filtered products
+function handleFilteredProducts(filteredProducts) {
+  displayProducts.value = filteredProducts
+  currentPage.value = 1 // Reset pagination when filters change
+  
+  // Cleanup and setup observer again
+  nextTick(() => {
+    cleanupObserver()
+    setupIntersectionObserver()
+  })
+}
+
+// Handle screen resize
+const handleResize = () => {
+  const wasMobile = isMobile.value
+  checkMobileScreen()
+  
+  // If screen size category changed, recalculate pagination
+  if (wasMobile !== isMobile.value) {
+    // Recalculate current page based on currently shown products
+    const currentlyShown = paginatedProducts.value.length
+    currentPage.value = Math.ceil(currentlyShown / itemsPerPage.value) || 1
+  }
+}
+
+// Initialize products when they load
+watch(() => categoryProducts.value, (newProducts) => {
+  if (newProducts.length > 0 && displayProducts.value.length === 0) {
+    displayProducts.value = newProducts
+    currentPage.value = 1
+    
+    nextTick(() => {
+      setupIntersectionObserver()
+    })
+  }
+}, { immediate: true })
+
+// Setup observer and resize listener on mount
+onMounted(() => {
+  checkMobileScreen()
+  
+  nextTick(() => {
+    setupIntersectionObserver()
+  })
+  
+  if (process.client) {
+    window.addEventListener('resize', handleResize)
+  }
+})
+
+// Cleanup on unmount
+onUnmounted(() => {
+  cleanupObserver()
+  
+  if (process.client) {
+    window.removeEventListener('resize', handleResize)
+  }
+})
+
+// Watch for route changes to reset pagination
+watch(() => route.params.category, () => {
+  currentPage.value = 1
+  displayProducts.value = []
+  cleanupObserver()
+})
+
 // Page title and meta
-useHead(() => ({
-  title: `${categoryName.value} - магазин ВИЗИТ`,
-  meta: [
-    { name: 'description', content: `${categoryName.value} в Урае - широкий выбор товаров в магазине ВИЗИТ по адресу: г. Урай мкр 1Д, дом 75А. Доступные цены, качественные товары.` },
-    { name: 'keywords', content: `${categoryName.value} Урай, купить ${categoryName.value.toLowerCase()} в Урае, магазин ${categoryName.value.toLowerCase()} Урай, ВИЗИТ Урай` },
-    { property: 'og:title', content: `${categoryName.value} Урай - магазин ВИЗИТ` },
-    { property: 'og:description', content: `${categoryName.value} в Урае - широкий выбор товаров в магазине ВИЗИТ по адресу: г. Урай мкр 1Д, дом 75А. Доступные цены, качественные товары.` },
-    { property: 'og:type', content: 'website' },
-    { property: 'og:url', content: `https://vizit-uray.vercel.app/${categoryUrl.value}` },
-    { property: 'og:image', content: `/images/categories/${categoryUrl.value}.jpg` } // Используем jpg для превью
-  ]
-}));
+useHead(() => {
+  // Получаем медиа-файл для Open Graph
+  const categoryMedia = bannerStore.getCategoryMedia(categoryName.value)
+  const categoryAlt = bannerStore.getCategoryAlt(categoryName.value)
+  
+  return {
+    title: `${categoryName.value} - магазин ВИЗИТ`,
+    meta: [
+      { name: 'description', content: `${categoryName.value} в Урае - широкий выбор товаров в магазине ВИЗИТ по адресу: г. Урай мкр 1Д, дом 75А. Доступные цены, качественные товары.` },
+      { name: 'keywords', content: `${categoryName.value} Урай, купить ${categoryName.value.toLowerCase()} в Урае, магазин ${categoryName.value.toLowerCase()} Урай, ВИЗИТ Урай` },
+      { property: 'og:title', content: `${categoryName.value} Урай - магазин ВИЗИТ` },
+      { property: 'og:description', content: categoryAlt },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:url', content: `https://vizit-uray.vercel.app/${categoryUrl.value}` },
+      { property: 'og:image', content: categoryMedia.endsWith('.jpg') || categoryMedia.endsWith('.png') ? categoryMedia : '/images/categories/default.jpg' }
+    ]
+  }
+})
 </script>
 
 <style lang="sass">
@@ -188,16 +259,49 @@ useHead(() => ({
   border-radius: 8px
   overflow: visible
 
+.category-page__products
+  position: relative
+
 .products-grid
   display: grid
   grid-template-columns: repeat(4, 1fr)
   gap: 20px
+  margin-bottom: 30px
   
   @include tablet
     grid-template-columns: repeat(2, 1fr)
   
   @include mobile
     grid-template-columns: 1fr
+
+.loading-indicator
+  display: flex
+  flex-direction: column
+  align-items: center
+  padding: 30px 0
+  
+  .loading-spinner
+    width: 30px
+    height: 30px
+    border: 3px solid $black
+    border-top: 3px solid $gray-dark
+    border-radius: 50%
+    animation: spin 1s linear infinite
+
+.no-products
+  text-align: center
+  padding: 60px 0
+  color: #666
+  font-size: 18px
+  
+  p
+    margin: 0
+
+@keyframes spin
+  0%
+    transform: rotate(0deg)
+  100%
+    transform: rotate(360deg)
 
 @include tablet
   .filters
@@ -215,4 +319,14 @@ useHead(() => ({
   .filters__group
     width: 100%
     justify-content: space-between
+    
+  .loading-indicator
+    padding: 20px 0
+    
+    .loading-spinner
+      width: 30px
+      height: 30px
+    
+    p
+      font-size: 14px
 </style>

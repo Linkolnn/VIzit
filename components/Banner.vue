@@ -1,31 +1,36 @@
 <template>
-  <div class="banner" :class="{ 'banner--video': isVideo }">
+  <div class="banner" :class="{ 'banner--video': isVideo}">
+    <!-- Video Banner -->
     <div v-if="isVideo" class="banner__video-wrapper">
       <video 
         ref="videoRef"
         class="banner__video" 
-        :key="currentMedia"
-        :src="currentMedia" 
+        :src="mediaPath" 
         autoplay 
         muted 
         playsinline 
-        loading="lazy" 
         loop
         @error="handleMediaError"
         @loadeddata="handleMediaLoad"
-      ></video>
+        @loadstart="handleMediaLoadStart"
+        @canplay="handleMediaLoad"
+      />
     </div>
+    
+    <!-- Image Banner -->
     <div v-else class="banner__image-wrapper">
       <img 
         ref="imageRef"
         class="banner__image" 
-        :key="currentMedia"
-        :src="currentMedia" 
-        :alt="alt"
+        :src="mediaPath" 
+        :alt="altText"
         @error="handleMediaError"
         @load="handleMediaLoad"
-      >
-    </div>
+        @loadstart="handleMediaLoadStart"
+        @loadend="handleMediaLoad"
+      />
+    </div>    
+    <!-- Content Overlay -->
     <div class="banner__content">
       <slot></slot>
     </div>
@@ -33,134 +38,58 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { useBannerStore } from '@/stores/banner'
 
 const props = defineProps({
-  media: {
-    type: [String, Array],
-    required: true
-  },
-  alt: {
+  categoryName: {
     type: String,
-    default: 'Banner image'
+    required: true
   }
-});
+})
 
-// Преобразуем media в массив, если это строка
-const mediaSources = computed(() => {
-  return Array.isArray(props.media) ? props.media : [props.media];
-});
+const bannerStore = useBannerStore()
 
-// Текущий индекс медиа-источника
-const currentMediaIndex = ref(0);
-const mediaLoaded = ref(false);
+// Reactive refs
+const videoRef = ref(null)
+const imageRef = ref(null)
+const hasError = ref(false)
 
-// Текущий медиа-источник
-const currentMedia = computed(() => {
-  if (mediaSources.value.length === 0) return '/images/categories/default.jpg';
-  return mediaSources.value[currentMediaIndex.value];
-});
+const mediaPath = computed(() => {
+  return bannerStore.getCategoryMedia(props.categoryName)
+})
 
-// Определяем, является ли файл видео или изображением по расширению
+const altText = computed(() => {
+  return bannerStore.getCategoryAlt(props.categoryName)
+})
+
 const isVideo = computed(() => {
-  if (!currentMedia.value) return false;
-  const videoExtensions = ['mp4', 'webm', 'ogg'];
-  const ext = currentMedia.value.split('.').pop().toLowerCase();
-  return videoExtensions.includes(ext);
-});
+  return bannerStore.isVideoFile(mediaPath.value)
+})
 
-// Обработчик ошибки загрузки медиа
-function handleMediaError(event) {
-  tryNextMedia();
-}
-
-// Пробуем следующий медиа-источник
-function tryNextMedia() {
-  if (currentMediaIndex.value < mediaSources.value.length - 1) {
-    currentMediaIndex.value++;
-  } 
-}
-
-// Обработчик успешной загрузки медиа
-function handleMediaLoad() {
-  mediaLoaded.value = true;
-}
-
-// Проверка доступности файла
-async function checkFileExists(url) {
-  try {
-    const response = await fetch(url, { 
-      method: 'HEAD',
-      cache: 'no-store'
-    });
-    return response.ok;
-  } catch (error) {
-    return false;
+// Проверка доступности медиа при монтировании
+const checkMediaAvailability = async () => {
+  if (!mediaPath.value) return
+  
+  const exists = await bannerStore.checkMediaExists(mediaPath.value)
+  if (!exists && props.categoryName !== 'default') {
+    console.warn(`Медиа файл не найден: ${mediaPath.value}`)
   }
 }
 
-// При монтировании компонента
-onMounted(async () => {
-  
-  for (let i = 0; i < mediaSources.value.length; i++) {
-    const url = mediaSources.value[i];
-    const exists = await checkFileExists(url);
-    if (exists) {
-      currentMediaIndex.value = i;
-      return;
-    } 
-  }
-  
-  // Если ни один формат не найден, используем последний (обычно fallba
-  if (mediaSources.value.length > 0) {
-    currentMediaIndex.value = mediaSources.value.length - 1;
-  }
-});
+// Watchers
+watch(() => props.categoryName, () => {
+  hasError.value = false
+  checkMediaAvailability()
+}, { immediate: true })
 
-// Следим за изменением источников медиа
-watch(() => props.media, async () => {
-  mediaLoaded.value = false;
-  
-  for (let i = 0; i < mediaSources.value.length; i++) {
-    const url = mediaSources.value[i];
-    const exists = await checkFileExists(url);
-    if (exists) {
-      currentMediaIndex.value = i;
-      return;
-    } 
-  }
-  
-  // Если ни один формат не найден, используем последний
-  if (mediaSources.value.length > 0) {
-    currentMediaIndex.value = mediaSources.value.length - 1;
-  }
-}, { deep: true });
+watch(() => mediaPath.value, () => {
+  hasError.value = false
+}, { immediate: true })
 
-// Подавление ошибок в консоли для медиа
 onMounted(() => {
-  // Перехватываем все ошибки загрузки медиа
-  const originalAddEventListener = window.EventTarget.prototype.addEventListener;
-  window.EventTarget.prototype.addEventListener = function(type, listener, options) {
-    if (type === 'error' && this instanceof HTMLImageElement || this instanceof HTMLVideoElement) {
-      const originalListener = listener;
-      listener = function(event) {
-        if (event.target.src && event.target.src.includes('/images/categories/')) {
-          // Для наших медиа-файлов подавляем ошибки в консоли
-          event.preventDefault();
-          event.stopPropagation();
-        } else {
-          // Для остальных файлов используем обычное поведение
-          return originalListener.apply(this, arguments);
-        }
-      };
-    }
-    return originalAddEventListener.call(this, type, listener, options);
-  };
-});
+  checkMediaAvailability()
+})
 
-// Ссылки на элементы
-const videoRef = ref(null);
-const imageRef = ref(null);
 </script>
 
 <style lang="sass">
@@ -174,6 +103,7 @@ const imageRef = ref(null);
   height: 727px
   overflow: hidden
   margin-bottom: 20px
+  transition: all 0.3s ease
   
   @include mobile
     height: 354px
@@ -185,12 +115,14 @@ const imageRef = ref(null);
   left: 0
   width: 100%
   height: 100%
+  background-color: #f5f5f5
 
 .banner__image,
 .banner__video
   width: 100%
   height: 100%
   object-fit: cover
+  transition: opacity 0.3s ease
 
 .banner__content
   position: relative
@@ -202,6 +134,7 @@ const imageRef = ref(null);
   padding: 0 20px 60px
   color: $white
   background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0) 100%)
+  transition: opacity 0.3s ease
   
   @include mobile
     padding: 0 20px 30px
@@ -216,4 +149,5 @@ const imageRef = ref(null);
 @include mobile
   .banner__content
     padding: 0 20px 30px
+    
 </style>

@@ -18,17 +18,26 @@
             <!-- Product Gallery -->
             <div class="product-gallery">
               <div class="product-gallery__main">
-                <img :src="product.image" :alt="product.title" class="product-gallery__image">
+                <img 
+                  :src="currentImage" 
+                  :alt="product.title" 
+                  class="product-gallery__image"
+                  @error="handleImageError"
+                >
               </div>
-              <div v-if="product.gallery && product.gallery.length" class="product-gallery__thumbs">
+              <div v-if="product.gallery && product.gallery.length > 1" class="product-gallery__thumbs">
                 <div 
                   v-for="(image, index) in product.gallery" 
                   :key="index" 
                   class="product-gallery__thumb"
                   :class="{ 'product-gallery__thumb--active': index === activeThumb }"
-                  @click="activeThumb = index"
+                  @click="setActiveThumb(index)"
                 >
-                  <img :src="image" :alt="`${product.title} - изображение ${index + 1}`">
+                  <img 
+                    :src="image" 
+                    :alt="`${product.title} - изображение ${index + 1}`"
+                    @error="handleThumbError(index)"
+                  >
                 </div>
               </div>
             </div>
@@ -40,14 +49,18 @@
               <div class="product-details__meta">
                 <div class="product-details__meta-item">
                   <span class="product-details__meta-label">Бренд:</span>
-                  <img class="product-details__meta-value" :src="product.brand" alt="Мзображение бренда">
-                  
+                  <img 
+                    class="product-details__meta-value" 
+                    :src="product.brand" 
+                    :alt="`Логотип бренда ${product.collection || 'товара'}`"
+                    @error="handleBrandError"
+                  >
                 </div>
-                <div class="product-details__meta-item">
+                <div v-if="product.collection" class="product-details__meta-item">
                   <span class="product-details__meta-label">Коллекция:</span>
                   <span class="product-details__meta-value">{{ product.collection }}</span>
                 </div>
-                <div class="product-details__meta-item">
+                <div v-if="product.article" class="product-details__meta-item">
                   <span class="product-details__meta-label">Артикул:</span>
                   <span class="product-details__meta-value">{{ product.article }}</span>
                 </div>
@@ -61,8 +74,9 @@
           
           <!-- Right column - Specifications -->
           <div class="product-layout__specs">
-            <div class="product-specs__actions  product-specs__actions--mobile">
-              <NuxtLink :to="social.telegram" class="consultation-btn">Бесплатная консультация
+            <div class="product-specs__actions product-specs__actions--mobile">
+              <NuxtLink :to="social.telegram" class="consultation-btn">
+                Бесплатная консультация
                 <img src="/assets/icons/telegram.svg" alt="Telegram" class="consultation-btn__icon">
               </NuxtLink>
             </div>
@@ -76,7 +90,8 @@
               </div>
               
               <div class="product-specs__actions product-specs__actions--desktop">
-                <NuxtLink :to="social.telegram" class="consultation-btn">Бесплатная консультация
+                <NuxtLink :to="social.telegram" class="consultation-btn">
+                  Бесплатная консультация
                   <img src="/assets/icons/telegram.svg" alt="Telegram" class="consultation-btn__icon">
                 </NuxtLink>
               </div>
@@ -86,13 +101,13 @@
       </div>
 
       <!-- Product Description -->
-      <div class="product-description mt-40">
+      <div v-if="product.fullDescription" class="product-description mt-40">
         <h2 class="product-description__title font-h3">Описание</h2>
         <div class="product-description__content font-text_medium" v-html="product.fullDescription"></div>
       </div>
 
       <!-- Similar Products -->
-      <div class="similar-products mt-40">
+      <div v-if="similarProducts.length > 0" class="similar-products mt-40">
         <h2 class="similar-products__title font-h3">Похожие товары</h2>
         <div class="products-grid">
           <ProductCard v-for="similarProduct in similarProducts" :key="similarProduct.id" :product="similarProduct" />
@@ -103,76 +118,121 @@
 </template>
 
 <script setup>
-import { useNavigationStore } from '@/stores/navigation';
-import { useProductsStore } from '@/stores/products';
-import { useRoute } from 'vue-router';
+import { useNavigationStore } from '@/stores/navigation'
+import { useProductsStore } from '@/stores/products'
 
-const route = useRoute();
-const navigationStore = useNavigationStore();
-const productsStore = useProductsStore();
-const social = computed(() => navigationStore.socialLinks);
+const route = useRoute()
+const navigationStore = useNavigationStore()
+const productsStore = useProductsStore()
+const social = computed(() => navigationStore.socialLinks)
 
 // State
-const activeThumb = ref(0);
-const productId = computed(() => parseInt(route.params.id) || 0);
+const activeThumb = ref(0)
+const productId = computed(() => parseInt(route.params.id) || 0)
 
 // Get product data from store
 const productData = computed(() => {
-  return productsStore.getProductById(productId.value) || null;
-});
+  return productsStore.getProductById(productId.value) || null
+})
 
 // If product not found, redirect to 404
 if (process.client && !productData.value) {
-  navigateTo('/404');
+  navigateTo('/404')
 }
 
-// Create reactive product object with default values for specifications and description
+// Create reactive product object with default values
 const product = computed(() => {
-  if (!productData.value) return {};
+  if (!productData.value) return {}
   
   return {
     ...productData.value,
-    // Default gallery if not provided
-    gallery: productData.value.gallery || [
-      productData.value.image
-    ],
+    // Ensure gallery is always an array with at least the main image
+    gallery: productData.value.gallery && productData.value.gallery.length > 0 
+      ? productData.value.gallery 
+      : [productData.value.image],
     // Default specifications if not provided
     specifications: productData.value.specifications || {
       'Тип товара': 'Товар',
-      'Бренд': productData.value.brand || '',
-      'Артикул': productData.value.article || '',
+      'Бренд': productData.value.brand || 'Не указан',
+      'Артикул': productData.value.article || 'Не указан',
     },
     // Default description if not provided
-    fullDescription: productData.value.fullDescription || `<p>${productData.value.description}</p>`
-  };
-});
+    fullDescription: productData.value.fullDescription || `<p>${productData.value.description || 'Описание отсутствует'}</p>`
+  }
+})
+
+// Current displayed image based on active thumb
+const currentImage = computed(() => {
+  if (!product.value.gallery || product.value.gallery.length === 0) {
+    return product.value.image || '/images/placeholder.jpg'
+  }
+  return product.value.gallery[activeThumb.value] || product.value.gallery[0]
+})
 
 // Get category information
-const categoryName = computed(() => product.value.category || 'Категория');
-const category = computed(() => navigationStore.getCategoryByName(categoryName.value));
-const categoryUrl = computed(() => category.value?.url || '/');
+const categoryName = computed(() => product.value.category || 'Категория')
+const category = computed(() => navigationStore.getCategoryByName(categoryName.value))
+const categoryUrl = computed(() => category.value?.url || '/')
 
 // Get similar products from the same category
 const similarProducts = computed(() => {
-  if (!product.value || !product.value.category) return [];
+  if (!product.value || !product.value.category) return []
   
   return productsStore.getProductsByCategory(product.value.category)
     .filter(p => p.id !== productId.value) // Exclude current product
-    .slice(0, 4); // Limit to 4 similar products
-});
+    .slice(0, 4) // Limit to 4 similar products
+})
+
+// Methods
+const setActiveThumb = (index) => {
+  if (index >= 0 && index < product.value.gallery.length) {
+    activeThumb.value = index
+  }
+}
+
+const handleImageError = (event) => {
+  console.warn('Ошибка загрузки главного изображения:', event.target.src)
+  event.target.src = '/images/placeholder.jpg'
+}
+
+const handleThumbError = (index) => {
+  console.warn(`Ошибка загрузки миниатюры ${index}:`, product.value.gallery[index])
+  // Можно заменить на placeholder или удалить из галереи
+}
+
+const handleBrandError = (event) => {
+  console.warn('Ошибка загрузки логотипа бренда:', event.target.src)
+  event.target.style.display = 'none'
+}
 
 // Format price
 const formatPrice = (price) => {
-  return new Intl.NumberFormat('ru-RU').format(price);
-};
+  return new Intl.NumberFormat('ru-RU').format(price)
+}
+
+// Reset active thumb when product changes
+watch(() => productId.value, () => {
+  activeThumb.value = 0
+})
 
 // Page title and meta
-useHead({
-  title: `${product.value.title} - ВИЗИТ`,
+useHead(() => ({
+  title: `${product.value.title || 'Товар'} - ВИЗИТ`,
   meta: [
-    { name: 'description', content: `${product.value.title} - купить в магазине ВИЗИТ` }
+    { 
+      name: 'description', 
+      content: `${product.value.title || 'Товар'} - ${product.value.description || 'купить в магазине ВИЗИТ'}` 
+    },
+    { 
+      name: 'keywords', 
+      content: `${product.value.title}, ${product.value.category}, ${product.value.brand || ''}, ВИЗИТ Урай`.replace(/,\s*,/g, ',').replace(/^,|,$/g, '') 
+    },
+    { property: 'og:title', content: `${product.value.title || 'Товар'} - ВИЗИТ` },
+    { property: 'og:description', content: product.value.description || 'Товар в магазине ВИЗИТ' },
+    { property: 'og:image', content: currentImage.value },
+    { property: 'og:type', content: 'product' }
   ]
-});
+}))
 </script>
 
 <style lang="sass">
@@ -258,15 +318,21 @@ useHead({
   border-radius: $radius
   overflow: hidden
   margin-bottom: 15px
+  background-color: #f5f5f5
+  display: flex
+  align-items: center
+  justify-content: center
 
 .product-gallery__image
   width: 100%
   height: 100%
   object-fit: cover
+  transition: opacity 0.3s ease
 
 .product-gallery__thumbs
   display: flex
   gap: 10px
+  flex-wrap: wrap
 
 .product-gallery__thumb
   width: 80px
@@ -276,6 +342,7 @@ useHead({
   cursor: pointer
   border: 2px solid transparent
   transition: all 0.3s ease
+  background-color: #f5f5f5
   
   img
     width: 100%
@@ -284,6 +351,9 @@ useHead({
   
   &--active
     border-color: $primary
+    
+  &:hover
+    border-color: lighten($primary, 20%)
 
 .product-details
   height: 100%
@@ -295,7 +365,7 @@ useHead({
   color: $text-primary
 
 .product-details__meta
-  margin-bottom: 10px
+  margin-bottom: 20px
 
 .product-details__meta-item
   display: flex
@@ -309,35 +379,26 @@ useHead({
   width: 120px
   font-weight: 500
   color: $text-secondary
+  flex-shrink: 0
 
 .product-details__meta-value
-  max-width: 80px
   color: $text-primary
+  
+  &[src] // для изображений
+    max-width: 80px
+    max-height: 40px
+    object-fit: contain
 
 .product-details__price-block
   display: flex
   align-items: center
+  margin-top: auto
 
 .product-details__price
   font-size: 32px
   font-weight: 700
   color: $text-primary
   margin: 0
-
-.product-details__old-price
-  font-size: 18px
-  text-decoration: line-through
-  color: $text-secondary
-  margin: 0 0 0 15px
-
-.product-details__description
-  margin-bottom: 30px
-
-.product-details__subtitle
-  font-size: 18px
-  font-weight: 600
-  margin: 0 0 15px
-  color: $text-primary
 
 .product-specs
   display: flex
@@ -357,6 +418,7 @@ useHead({
 .product-specs__list
   padding: 0
   margin-bottom: 20px
+  flex-grow: 1
 
 .product-specs__row
   display: flex
@@ -374,7 +436,7 @@ useHead({
 
 .product-specs__value
   width: 60%
-  padding: 10px 
+  padding: 10px 15px
   font-size: 16px
   color: $text-primary
 
@@ -382,6 +444,7 @@ useHead({
   margin-top: auto
   display: flex
   justify-content: center
+  padding: 15px
 
   &--mobile
     display: none
@@ -400,21 +463,21 @@ useHead({
   font-weight: 700
   cursor: pointer
   transition: all 0.3s ease
+  text-decoration: none
   
   &:hover
     background-color: darken(#4DA7DE, 5%)
+    color: $white
 
 .consultation-btn__icon
   width: 34px
   height: 34px
   margin-left: 10px
 
-.product-details__actions
-  margin-top: auto
-
 .product-description
   background-color: $white
   border-radius: $radius
+  padding: 30px
   margin-bottom: 40px
 
 .product-description__title
@@ -426,18 +489,34 @@ useHead({
   
   p
     margin-bottom: 15px
+    line-height: 1.6
     
     &:last-child
       margin-bottom: 0
+
+.similar-products
+  margin-top: 40px
 
 .similar-products__title
   margin: 0 0 20px
   color: $text-primary
 
+.products-grid
+  display: grid
+  grid-template-columns: repeat(4, 1fr)
+  gap: 20px
+  
+  @include tablet
+    grid-template-columns: repeat(2, 1fr)
+  
+  @include mobile
+    grid-template-columns: 1fr
+
 @include tablet
   .product-specs__actions
     &--mobile
       display: flex
+      padding: 0 0 15px 0
       
     &--desktop
       display: none
@@ -445,8 +524,8 @@ useHead({
   .product-gallery__main
     height: 350px
   
-  .product-details__old-price
-    font-size: 16px
+  .product-details__price
+    font-size: 28px
 
 @include mobile
   .product-gallery__main
@@ -462,8 +541,19 @@ useHead({
   
   .product-details__meta-label
     width: 100px
-  
-  .product-details__old-price
     font-size: 14px
   
+  .product-details__price
+    font-size: 24px
+  
+  .product-specs__title
+    font-size: 24px
+    
+  .consultation-btn
+    font-size: 14px
+    padding: 12px 16px
+    
+  .consultation-btn__icon
+    width: 28px
+    height: 28px
 </style>

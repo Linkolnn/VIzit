@@ -20,7 +20,10 @@ export const useFiltersStore = defineStore('filters', {
     },
     
     // Текущая категория
-    currentCategory: ''
+    currentCategory: '',
+    
+    // Опции производителей (динамически формируются)
+    manufacturerOptions: []
   }),
   
   getters: {
@@ -50,9 +53,6 @@ export const useFiltersStore = defineStore('filters', {
     selectedManufacturersLabel: (state) => {
       if (state.selectedManufacturers.length === 0) return 'Все';
       
-      // Здесь мы не можем использовать manufacturerOptions напрямую,
-      // так как они вычисляются динамически на основе продуктов
-      // Поэтому возвращаем просто список выбранных производителей
       if (state.selectedManufacturers.length > 2) {
         return `Выбрано: ${state.selectedManufacturers.length}`;
       }
@@ -78,16 +78,20 @@ export const useFiltersStore = defineStore('filters', {
       this.selectedManufacturers = [];
     },
     
+    // Установка опций производителей
+    setManufacturerOptions(options) {
+      this.manufacturerOptions = options;
+    },
+    
     // Обновление выбранных фильтров
     updateFilters(filters) {
-      if (filters.sort) this.selectedSort = filters.sort;
-      if (filters.groups) this.selectedGroups = filters.groups;
-      if (filters.manufacturers) this.selectedManufacturers = filters.manufacturers;
+      if (filters.sort !== undefined) this.selectedSort = filters.sort;
+      if (filters.groups !== undefined) this.selectedGroups = filters.groups;
+      if (filters.manufacturers !== undefined) this.selectedManufacturers = filters.manufacturers;
     },
     
     // Переключение состояния фильтра (открыт/закрыт)
     toggleFilter(filterName) {
-      // Сохраняем текущее состояние фильтра, на который нажали
       const wasOpen = this.openFilters[filterName];
       
       // Закрываем все фильтры
@@ -96,12 +100,91 @@ export const useFiltersStore = defineStore('filters', {
       });
       
       // Если фильтр был закрыт, открываем его
-      // Если фильтр был открыт, оставляем его закрытым
       if (!wasOpen) {
         this.openFilters[filterName] = true;
       }
     },
     
+    // Фильтрация продуктов
+    filterProducts(products) {
+      let result = [...products];
+      
+      // Применяем сортировку
+      switch (this.selectedSort) {
+        case 'price-asc':
+          result.sort((a, b) => a.price - b.price);
+          break;
+        case 'price-desc':
+          result.sort((a, b) => b.price - a.price);
+          break;
+        case 'popular':
+          // Логика сортировки по популярности
+          break;
+        case 'new':
+          // Логика сортировки по новизне
+          result.sort((a, b) => a.price - b.price);
+          break;
+      }
+      
+      // Применяем фильтрацию по группам
+      if (this.selectedGroups.length > 0) {
+        result = result.filter(product => {
+          const productGroup = this.getProductGroup(product);
+          return this.selectedGroups.includes(productGroup);
+        });
+      }
+      
+      // Применяем фильтрацию по производителям
+      if (this.selectedManufacturers.length > 0) {
+        result = result.filter(product => {
+          const manufacturer = product.specifications?.Бренд || 
+                              product.brand?.split('/').pop().replace('.jpg', '') || 
+                              'Unknown';
+          return this.selectedManufacturers.includes(manufacturer);
+        });
+      }
+      
+      return result;
+    },
+    
+    // Определение группы товара в зависимости от категории
+    getProductGroup(product) {
+      // Явно получаем данные из filtersData через state
+      const categoryGroups = this.groupOptions[this.currentCategory];
+      
+      if (!categoryGroups || !categoryGroups.length || !product.specifications) {
+        return '';
+      }
+
+      // Получаем все возможные поля для поиска
+      const searchFields = [
+        product.specifications['Тип товара'],
+        product.specifications['Материал'], 
+        product.specifications['Основа'],
+        product.specifications['Тип'],
+        product.specifications['Категория'],
+        product.name
+      ]
+        .filter(Boolean) // убираем undefined/null значения
+        .map(field => field.toLowerCase());
+
+      // Проходим по всем доступным группам из filters.json
+      for (const group of categoryGroups) {
+        const groupLabel = group.label.toLowerCase();
+        
+        // Ищем совпадения в полях товара с названием группы из filters.json
+        const hasMatch = searchFields.some(field => {
+          return field.includes(groupLabel);
+        });
+
+        if (hasMatch) {
+          return group.value;
+        }
+      }
+
+      return '';
+    },
+
     // Сброс всех фильтров
     resetFilters() {
       this.selectedSort = 'price-asc';

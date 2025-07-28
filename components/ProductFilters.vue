@@ -17,7 +17,7 @@
               type="radio" 
               :value="option.value" 
               v-model="filtersStore.selectedSort" 
-              @change="updateFilters"
+              @change="applyFilters"
             >
             <span class="radio-custom"></span>
             <span class="option-label">{{ option.label }}</span>
@@ -27,7 +27,7 @@
     </div>
 
     <!-- Группировка -->
-    <!-- <div class="filter-group">
+    <div class="filter-group" v-if="filtersStore.currentGroupOptions.length > 0">
       <div class="filter-header" @click="toggleFilter('group')">
         <h3 class="filter-title">Группировка: <span>{{ filtersStore.selectedGroupsLabel }}</span></h3>
         <div class="filter-toggle" :class="{ 'is-open': filtersStore.openFilters.group }">
@@ -43,17 +43,17 @@
               type="checkbox" 
               :value="option.value" 
               v-model="filtersStore.selectedGroups" 
-              @change="updateFilters"
+              @change="applyFilters"
             >
             <span class="checkbox-custom"></span>
             <span class="option-label">{{ option.label }}</span>
           </label>
         </div>
       </div>
-    </div> -->
+    </div>
 
     <!-- Производитель -->
-    <div class="filter-group">
+    <div class="filter-group" v-if="manufacturerOptions.length > 0">
       <div class="filter-header" @click="toggleFilter('manufacturer')">
         <h3 class="filter-title">Производитель: <span>{{ filtersStore.selectedManufacturersLabel }}</span></h3>
         <div class="filter-toggle" :class="{ 'is-open': filtersStore.openFilters.manufacturer }">
@@ -69,7 +69,7 @@
               type="checkbox" 
               :value="option.value" 
               v-model="filtersStore.selectedManufacturers" 
-              @change="updateFilters"
+              @change="applyFilters"
             >
             <span class="checkbox-custom"></span>
             <img v-if="option.logo" class="manufacturer-logo" :src="option.logo" :alt="option.label">
@@ -97,7 +97,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['update:filters']);
+const emit = defineEmits(['filtered-products']);
 
 // Используем хранилище Pinia для фильтров
 const filtersStore = useFiltersStore();
@@ -122,13 +122,23 @@ const manufacturerOptions = computed(() => {
   });
   
   // Преобразуем Map в массив опций
-  return Array.from(manufacturersMap.values()).map(manufacturer => {
+  const options = Array.from(manufacturersMap.values()).map(manufacturer => {
     return {
       value: manufacturer.name,
       label: manufacturer.name,
       logo: manufacturer.logo
     };
   });
+  
+  // Обновляем опции производителей в store
+  filtersStore.setManufacturerOptions(options);
+  
+  return options;
+});
+
+// Фильтрованные продукты
+const filteredProducts = computed(() => {
+  return filtersStore.filterProducts(props.products);
 });
 
 // Методы
@@ -136,15 +146,27 @@ function toggleFilter(filterName) {
   filtersStore.toggleFilter(filterName);
 }
 
-function updateFilters() {
-  emit('update:filters', filtersStore.activeFilters);
+function applyFilters() {
+  // Эмитим отфильтрованные продукты в родительский компонент
+  emit('filtered-products', filteredProducts.value);
 }
 
 // Устанавливаем текущую категорию при изменении
 watch(() => props.category, (newCategory) => {
   filtersStore.setCategory(newCategory);
-  updateFilters();
-}, { immediate: true });</script>
+  applyFilters();
+}, { immediate: true });
+
+// Следим за изменениями продуктов
+watch(() => props.products, () => {
+  applyFilters();
+}, { immediate: true });
+
+// Следим за изменениями фильтров
+watch(() => filtersStore.activeFilters, () => {
+  applyFilters();
+}, { deep: true });
+</script>
 
 <style lang="sass" scoped>
 .product-filters
@@ -223,7 +245,6 @@ watch(() => props.category, (newCategory) => {
   input[type="checkbox"]
     position: absolute
     opacity: 0
-    // cursor: pointer
     height: 0
     width: 0
 
@@ -289,11 +310,7 @@ input[type="checkbox"]:checked ~ .checkbox-custom:after
   height: 24px
   margin-right: 5px
   border-radius: 3px
-  
-  img
-    width: 100%
-    height: 100%
-    object-fit: contain
+  object-fit: contain
 
 @include mobile
   .filter-group
