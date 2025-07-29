@@ -22,7 +22,6 @@
                   :src="currentImage" 
                   :alt="product.title" 
                   class="product-gallery__image"
-                  @error="handleImageError"
                 >
               </div>
               <div v-if="product.gallery && product.gallery.length > 1" class="product-gallery__thumbs">
@@ -164,7 +163,7 @@ const product = computed(() => {
 // Current displayed image based on active thumb
 const currentImage = computed(() => {
   if (!product.value.gallery || product.value.gallery.length === 0) {
-    return product.value.image || '/images/placeholder.jpg'
+    return product.value.image
   }
   return product.value.gallery[activeThumb.value] || product.value.gallery[0]
 })
@@ -188,11 +187,6 @@ const setActiveThumb = (index) => {
   if (index >= 0 && index < product.value.gallery.length) {
     activeThumb.value = index
   }
-}
-
-const handleImageError = (event) => {
-  console.warn('Ошибка загрузки главного изображения:', event.target.src)
-  event.target.src = '/images/placeholder.jpg'
 }
 
 const handleThumbError = (index) => {
