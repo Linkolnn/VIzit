@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer container">
+  <footer class="footer">
     <div class="footer__top">
       <div class="footer__content">
         <div class="footer__contacts footer__contacts--left">
@@ -98,18 +98,19 @@ onBeforeUnmount(() => {
 @import '@global'
 
 .footer
+  max-width: 1380px
+  margin: 0 auto
   background-color: $bg-dark
   width: 100%
   color: $text-light
 
 .footer__top
   background-color: $bg-dark
-  padding: 15px 0
+  padding: 15px
 
 .footer__content
   display: flex
   justify-content: space-between
-  padding: 15px 0
 
 .footer__logo-wrapper
   display: flex
@@ -144,7 +145,7 @@ onBeforeUnmount(() => {
 
 .footer__social-bar
   background-color: $bg-dark
-  padding-bottom: 15px 
+  padding: 0px 15px 15px 
 
 .footer__social
   display: flex

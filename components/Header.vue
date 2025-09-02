@@ -108,10 +108,7 @@ const toggleNavMenu = () => {
   display: flex
   flex-direction: column
   font-size: 20px
-  font-weight: 800
-  >*
-  font-size: 20px
-  font-weight: 800
+  font-weight: 700
   
   &--left
     align-items: flex-start

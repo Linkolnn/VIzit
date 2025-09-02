@@ -242,7 +242,7 @@ useHead(() => {
 @import '@mixin'
 
 .category-page
-  padding: 30px 0
+  padding-bottom: 30px
 
 .category-page__title
   margin: 0 0 10px

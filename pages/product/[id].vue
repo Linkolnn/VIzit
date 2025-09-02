@@ -258,7 +258,7 @@ useHead(() => ({
   font-size: 14px
 
 .breadcrumbs__current
-  color: $text-primary
+  color: $black
   font-size: 14px
   font-weight: 500
 
@@ -356,7 +356,7 @@ useHead(() => ({
 
 .product-details__title
   margin: 0 0 20px
-  color: $text-primary
+  color: $black
 
 .product-details__meta
   margin-bottom: 20px
@@ -376,7 +376,7 @@ useHead(() => ({
   flex-shrink: 0
 
 .product-details__meta-value
-  color: $text-primary
+  color: $black
   
   &[src] // для изображений
     max-width: 80px
@@ -391,7 +391,7 @@ useHead(() => ({
 .product-details__price
   font-size: 32px
   font-weight: 700
-  color: $text-primary
+  color: $black
   margin: 0
 
 .product-specs
@@ -402,11 +402,11 @@ useHead(() => ({
   background-color: $white
 
 .product-specs__title
-  padding: 15px
+  padding: 15px 0px
   font-size: 28px
   font-weight: 600
   margin: 0
-  color: $text-primary
+  color: $black
   border-bottom: 1px solid $border-light
 
 .product-specs__list
@@ -432,7 +432,7 @@ useHead(() => ({
   width: 60%
   padding: 10px 15px
   font-size: 16px
-  color: $text-primary
+  color: $black
 
 .product-specs__actions
   margin-top: auto
@@ -474,10 +474,10 @@ useHead(() => ({
 
 .product-description__title
   margin: 0 0 20px
-  color: $text-primary
+  color: $black
 
 .product-description__content
-  color: $text-primary
+  color: $black
   
   p
     margin-bottom: 15px
@@ -491,7 +491,7 @@ useHead(() => ({
 
 .similar-products__title
   margin: 0 0 20px
-  color: $text-primary
+  color: $black
 
 .products-grid
   display: grid

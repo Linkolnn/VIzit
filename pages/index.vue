@@ -66,7 +66,7 @@ const sliderData = computed(() => slidesStore.getSlides);
   color: $black
   font-size: 32px 
   line-height: 0.9 
-  font-weight: 900 
+  font-weight: 600 
 
   @include mobile
     font-size: 20px
@@ -75,7 +75,7 @@ const sliderData = computed(() => slidesStore.getSlides);
   display: block
   text-transform: uppercase
   font-size: 96px 
-  font-weight: 900 
+  font-weight: 800 
   
   @include mobile
     font-size: 64px
